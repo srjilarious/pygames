@@ -16,23 +16,23 @@ from pygame.locals import (
     QUIT,
 )
 
-ScreenWidth = 800
-ScreenHeight = 600
+ScreenWidth = 160
+ScreenHeight = 90
 
 
 class GameContext:
     def __init__(self):
         # Set up the drawing window
-        self.screen = pygame.display.set_mode([ScreenWidth, ScreenHeight], flags=pygame.FULLSCREEN | pygame.HWSURFACE)
-        self.font = pygame.font.Font(None, 40)
+        self.screen = pygame.display.set_mode([ScreenWidth, ScreenHeight], flags=pygame.FULLSCREEN | pygame.HWSURFACE | pygame.SCALED)
+        self.font = pygame.font.Font(None, 20)
         self.running = True
-        self.player_x = 250 
-        self.player_y = 250
-        self.player_radius = 50
+        self.player_x = 25 
+        self.player_y = 25
+        self.player_radius = 5
         self.player_radius_sq = self.player_radius**2
-        self.dot_radius = 40
+        self.dot_radius = 4
         self.dot_radius_sq = self.dot_radius**2
-        self.score = 1234
+        self.score = 0
         self.dots = []
 
     def create_dot(self):
@@ -50,16 +50,16 @@ class GameContext:
         pressed_keys = pygame.key.get_pressed()
 
         if pressed_keys[K_UP]:
-            self.player_y = max(-2*ScreenHeight, self.player_y - 1)
+            self.player_y = max(-2*ScreenHeight, self.player_y - 0.1)
         if pressed_keys[K_DOWN]:
-            self.player_y = min(self.player_y + 1,  2*ScreenHeight)
+            self.player_y = min(self.player_y + 0.1,  2*ScreenHeight)
         if pressed_keys[K_LEFT]:
-            self.player_x = max(-2*ScreenHeight, self.player_x - 1)
+            self.player_x = max(-2*ScreenHeight, self.player_x - 0.1)
         if pressed_keys[K_RIGHT]:
-            self.player_x = min(self.player_x + 1, 2*ScreenHeight)
+            self.player_x = min(self.player_x + 0.1, 2*ScreenHeight)
         if pressed_keys[K_RETURN]:
-            self.player_x = 250
-            self.player_y = 250
+            self.player_x = 25
+            self.player_y = 25
         if pressed_keys[K_h]:
             self.create_dot()
         if pressed_keys[K_c]:
@@ -104,8 +104,15 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 context.running = False
 
+        ticks = pygame.time.get_ticks()
         context.update_game()
         context.render()
+        
+        new_ticks = pygame.time.get_ticks()
+        delta_ticks = new_ticks = ticks
+        if delta_ticks < (1000/30):
+            pygame.time.wait((1000/30) - delta_ticks)
+
 
     # Done! Time to quit.
     pygame.quit()
