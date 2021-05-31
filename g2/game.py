@@ -3,31 +3,24 @@ import pygame
 import math
 import random
 
-from pygame.locals import (
-    K_UP,
-    K_DOWN,
-    K_LEFT,
-    K_RIGHT,
-    K_RETURN,
-    K_ESCAPE,
-    K_h,
-    K_c,
-    KEYDOWN,
-    QUIT,
-)
+from pygame.locals import *
 
-ScreenWidth = 800
-ScreenHeight = 600
-
-
+WindowWidth = 960
+WindowHeight = 400
+ScreenWidth = 240
+ScreenHeight = 100
+PlayerStartX = 25
+PlayerStartY = 25
 class GameContext:
     def __init__(self):
         # Set up the drawing window
-        self.screen = pygame.display.set_mode([ScreenWidth, ScreenHeight], flags=pygame.FULLSCREEN | pygame.HWSURFACE)
+        self.screen = pygame.display.set_mode([WindowWidth, WindowHeight], flags=HWSURFACE|DOUBLEBUF|RESIZABLE)
+        self.off_screen = pygame.surface.Surface((ScreenWidth, ScreenHeight))
+
         self.font = pygame.font.Font(None, 40)
         self.running = True
-        self.player_x = 250 
-        self.player_y = 250
+        self.player_x = PlayerStartX
+        self.player_y = PlayerStartY
         self.player_radius = 50
         self.player_radius_sq = self.player_radius**2
         self.dot_radius = 40
@@ -75,17 +68,19 @@ class GameContext:
 
     def render(self):
         # Fill the background with white
-        self.screen.fill((0,0,0))
+        self.off_screen.fill((0,0,0))
 
         # Draw a solid blue circle in the center
-        pygame.draw.circle(self.screen, (0, 0, 255), (self.player_x, self.player_y), self.player_radius)
+        pygame.draw.circle(self.off_screen, (0, 0, 255), (self.player_x, self.player_y), self.player_radius)
 
         # Draw the dots
         for i, dot in enumerate(self.dots):
-            pygame.draw.circle(self.screen, (255, 255, 0), (dot[0], dot[1]), self.dot_radius)
+            pygame.draw.circle(self.off_screen, (255, 255, 0), (dot[0], dot[1]), self.dot_radius)
 
         txt = self.font.render("Score: " + str(self.score), True, pygame.Color('white'))
-        self.screen.blit(txt, (5, 5))
+        self.off_screen.blit(txt, (5, 5))
+
+        self.screen.blit(pygame.transform.scale(self.off_screen, self.screen.get_rect().size), (0, 0))
         # Flip the display
         pygame.display.flip()
 
@@ -101,8 +96,10 @@ if __name__ == "__main__":
     while context.running:
         # Did the user click the window close button?
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == QUIT:
                 context.running = False
+            elif event.type == VIDEORESIZE:
+                context.screen = pygame.display.set_mode(event.size, flags=HWSURFACE|DOUBLEBUF|RESIZABLE)
 
         context.update_game()
         context.render()
