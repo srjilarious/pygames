@@ -5,17 +5,18 @@ import random
 
 from pygame.locals import *
 
-WindowWidth = 960
-WindowHeight = 400
-ScreenWidth = 240
-ScreenHeight = 100
+WindowWidth = 1920
+WindowHeight = 1080
+ScreenWidth = 192
+ScreenHeight = 108
 PlayerStartX = 25
 PlayerStartY = 25
+Speed = 0.5
 
 class GameContext:
     def __init__(self):
         # Set up the drawing window
-        self.screen = pygame.display.set_mode([WindowWidth, WindowHeight], flags=HWSURFACE|DOUBLEBUF|RESIZABLE)
+        self.screen = pygame.display.set_mode([WindowWidth, WindowHeight], flags=HWSURFACE|DOUBLEBUF)
         self.off_screen = pygame.surface.Surface((ScreenWidth, ScreenHeight))
 
         self.font = pygame.font.Font(None, 15)
@@ -29,6 +30,10 @@ class GameContext:
         self.score = 1234
         self.dots = []
 
+        if pygame.joystick.get_count() > 0:
+            self.joystick = joystick = pygame.joystick.Joystick(0)
+            self.joystick.init()
+
     def create_dot(self):
         if len(self.dots) < 5000:
             self.dots += [(random.randint(0, ScreenWidth), random.randint(0, ScreenHeight))]
@@ -40,17 +45,29 @@ class GameContext:
         return False
 
 
+    def move_up(self):
+        self.player_y = max(self.player_radius, self.player_y - Speed)
+
+    def move_down(self):
+        self.player_y = min(self.player_y + Speed,  ScreenHeight - self.player_radius)
+
+    def move_left(self):
+        self.player_x = max(self.player_radius, self.player_x - Speed)
+
+    def move_right(self):
+        self.player_x = min(self.player_x + Speed, ScreenWidth - self.player_radius)
+
     def update_game(self):
         pressed_keys = pygame.key.get_pressed()
 
         if pressed_keys[K_UP]:
-            self.player_y = max(self.player_radius, self.player_y - 0.1)
+            self.move_up()
         if pressed_keys[K_DOWN]:
-            self.player_y = min(self.player_y + 0.1,  ScreenHeight - self.player_radius)
+            self.move_down()
         if pressed_keys[K_LEFT]:
-            self.player_x = max(self.player_radius, self.player_x - 0.1)
+            self.move_left()
         if pressed_keys[K_RIGHT]:
-            self.player_x = min(self.player_x + 0.1, ScreenWidth - self.player_radius)
+            self.move_right()
         if pressed_keys[K_RETURN]:
             self.player_x = PlayerStartX
             self.player_y = PlayerStartY
@@ -60,6 +77,18 @@ class GameContext:
             self.dots.clear()
         if pressed_keys[K_ESCAPE]:
             self.running = False
+
+
+        if self.joystick is not None:
+            jx, jy = self.joystick.get_hat(0)
+            if jy > 0:
+                self.move_up()
+            if jy < 0:
+                self.move_down()
+            if jx < 0:
+                self.move_left()
+            if jx > 0:
+                self.move_right()
 
         # Check collisions with dots
         for i, dot in enumerate(self.dots):
@@ -78,7 +107,7 @@ class GameContext:
         for i, dot in enumerate(self.dots):
             pygame.draw.circle(self.off_screen, (255, 255, 0), (dot[0], dot[1]), self.dot_radius)
 
-        txt = self.font.render("Score: " + str(self.score), True, pygame.Color('white'))
+        txt = self.font.render("Score: " + str(self.score), False, pygame.Color('white'))
         self.off_screen.blit(txt, (5, 5))
 
         self.screen.blit(pygame.transform.scale(self.off_screen, self.screen.get_rect().size), (0, 0))
@@ -88,6 +117,7 @@ class GameContext:
 
 if __name__ == "__main__":
     pygame.init()
+    pygame.joystick.init()
 
     context = GameContext()
     
@@ -100,7 +130,7 @@ if __name__ == "__main__":
             if event.type == QUIT:
                 context.running = False
             elif event.type == VIDEORESIZE:
-                context.screen = pygame.display.set_mode(event.size, flags=HWSURFACE|DOUBLEBUF|RESIZABLE)
+                context.screen = pygame.display.set_mode(event.size, flags=HWSURFACE|DOUBLEBUF)
 
         context.update_game()
         context.render()
