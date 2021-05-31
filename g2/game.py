@@ -11,19 +11,20 @@ ScreenWidth = 240
 ScreenHeight = 100
 PlayerStartX = 25
 PlayerStartY = 25
+
 class GameContext:
     def __init__(self):
         # Set up the drawing window
         self.screen = pygame.display.set_mode([WindowWidth, WindowHeight], flags=HWSURFACE|DOUBLEBUF|RESIZABLE)
         self.off_screen = pygame.surface.Surface((ScreenWidth, ScreenHeight))
 
-        self.font = pygame.font.Font(None, 40)
+        self.font = pygame.font.Font(None, 15)
         self.running = True
         self.player_x = PlayerStartX
         self.player_y = PlayerStartY
-        self.player_radius = 50
+        self.player_radius = 8
         self.player_radius_sq = self.player_radius**2
-        self.dot_radius = 40
+        self.dot_radius = 4
         self.dot_radius_sq = self.dot_radius**2
         self.score = 1234
         self.dots = []
@@ -43,16 +44,16 @@ class GameContext:
         pressed_keys = pygame.key.get_pressed()
 
         if pressed_keys[K_UP]:
-            self.player_y = max(-2*ScreenHeight, self.player_y - 1)
+            self.player_y = max(self.player_radius, self.player_y - 0.1)
         if pressed_keys[K_DOWN]:
-            self.player_y = min(self.player_y + 1,  2*ScreenHeight)
+            self.player_y = min(self.player_y + 0.1,  ScreenHeight - self.player_radius)
         if pressed_keys[K_LEFT]:
-            self.player_x = max(-2*ScreenHeight, self.player_x - 1)
+            self.player_x = max(self.player_radius, self.player_x - 0.1)
         if pressed_keys[K_RIGHT]:
-            self.player_x = min(self.player_x + 1, 2*ScreenHeight)
+            self.player_x = min(self.player_x + 0.1, ScreenWidth - self.player_radius)
         if pressed_keys[K_RETURN]:
-            self.player_x = 250
-            self.player_y = 250
+            self.player_x = PlayerStartX
+            self.player_y = PlayerStartY
         if pressed_keys[K_h]:
             self.create_dot()
         if pressed_keys[K_c]:
