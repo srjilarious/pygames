@@ -1,6 +1,7 @@
 # Simple pygame program
 import pygame
 import math
+import random
 
 from pygame.locals import (
     K_UP,
@@ -9,6 +10,8 @@ from pygame.locals import (
     K_RIGHT,
     K_RETURN,
     K_ESCAPE,
+    K_h,
+    K_c,
     KEYDOWN,
     QUIT,
 )
@@ -16,52 +19,93 @@ from pygame.locals import (
 ScreenWidth = 800
 ScreenHeight = 600
 
-running = True
-player_x = 250 
-player_y = 250
 
-def update_game():
-    global player_x, player_y, running
-    pressed_keys = pygame.key.get_pressed()
+class GameContext:
+    def __init__(self):
+        # Set up the drawing window
+        self.screen = pygame.display.set_mode([ScreenWidth, ScreenHeight], flags=pygame.FULLSCREEN | pygame.HWSURFACE)
+        self.font = pygame.font.Font(None, 40)
+        self.running = True
+        self.player_x = 250 
+        self.player_y = 250
+        self.player_radius = 50
+        self.player_radius_sq = self.player_radius**2
+        self.dot_radius = 40
+        self.dot_radius_sq = self.dot_radius**2
+        self.score = 1234
+        self.dots = []
 
-    if pressed_keys[K_UP]:
-        player_y = max(-2*ScreenHeight, player_y - 1)
-    if pressed_keys[K_DOWN]:
-        player_y = min(player_y + 1,  2*ScreenHeight)
-    if pressed_keys[K_LEFT]:
-        player_x = max(-2*ScreenHeight, player_x - 1)
-    if pressed_keys[K_RIGHT]:
-        player_x = min(player_x + 1, 2*ScreenHeight)
-    if pressed_keys[K_RETURN]:
-        player_x = 250
-        player_y = 250
-    if pressed_keys[K_ESCAPE]:
-        running = False
+    def create_dot(self):
+        if len(self.dots) < 5000:
+            self.dots += [(random.randint(0, ScreenWidth), random.randint(0, ScreenHeight))]
 
-def render(screen):
-    # Fill the background with white
-    screen.fill((0,0,0))
+    def check_collide(self, dot):
+        dist_sq = (dot[0] - self.player_x)**2 + (dot[1] - self.player_y)**2
+        if dist_sq < (self.dot_radius_sq + self.player_radius_sq):
+            return True
+        return False
 
-    # Draw a solid blue circle in the center
-    pygame.draw.circle(screen, (0, 0, 255), (player_x, player_y), 50)
 
-    # Flip the display
-    pygame.display.flip()
+    def update_game(self):
+        pressed_keys = pygame.key.get_pressed()
+
+        if pressed_keys[K_UP]:
+            self.player_y = max(-2*ScreenHeight, self.player_y - 1)
+        if pressed_keys[K_DOWN]:
+            self.player_y = min(self.player_y + 1,  2*ScreenHeight)
+        if pressed_keys[K_LEFT]:
+            self.player_x = max(-2*ScreenHeight, self.player_x - 1)
+        if pressed_keys[K_RIGHT]:
+            self.player_x = min(self.player_x + 1, 2*ScreenHeight)
+        if pressed_keys[K_RETURN]:
+            self.player_x = 250
+            self.player_y = 250
+        if pressed_keys[K_h]:
+            self.create_dot()
+        if pressed_keys[K_c]:
+            self.dots.clear()
+        if pressed_keys[K_ESCAPE]:
+            self.running = False
+
+        # Check collisions with dots
+        for i, dot in enumerate(self.dots):
+            if self.check_collide(dot):
+                self.score += 50
+                del self.dots[i]
+
+    def render(self):
+        # Fill the background with white
+        self.screen.fill((0,0,0))
+
+        # Draw a solid blue circle in the center
+        pygame.draw.circle(self.screen, (0, 0, 255), (self.player_x, self.player_y), self.player_radius)
+
+        # Draw the dots
+        for i, dot in enumerate(self.dots):
+            pygame.draw.circle(self.screen, (255, 255, 0), (dot[0], dot[1]), self.dot_radius)
+
+        txt = self.font.render("Score: " + str(self.score), True, pygame.Color('white'))
+        self.screen.blit(txt, (5, 5))
+        # Flip the display
+        pygame.display.flip()
+
 
 if __name__ == "__main__":
     pygame.init()
 
-    # Set up the drawing window
-    screen = pygame.display.set_mode([ScreenWidth, ScreenHeight])
+    context = GameContext()
+    
+    for i in range(100):
+        context.create_dot()
 
-    while running:
+    while context.running:
         # Did the user click the window close button?
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        update_game()
-        render(screen)
+        context.update_game()
+        context.render()
 
     # Done! Time to quit.
     pygame.quit()
