@@ -33,7 +33,8 @@ class GameContext:
         if pygame.joystick.get_count() > 0:
             self.joystick = joystick = pygame.joystick.Joystick(0)
             self.joystick.init()
-
+        else:
+            self.joystick = None
     def create_dot(self):
         if len(self.dots) < 5000:
             self.dots += [(random.randint(0, ScreenWidth), random.randint(0, ScreenHeight))]
