@@ -117,6 +117,14 @@ class GameContext:
         
     def check_collide_tile(self, player_rect, x, y):
         tile = self.get_main_tile(x, y)
+
+        # Grab our tile properties, if any
+        tile_props = self.tmxdata.tile_properties.get(tile, {})
+
+        # If a tile in our set is marked as non-blocking, then don't collide.
+        if tile_props.get("blocks", "all") == "none":
+            return False
+
         tw = self.tmxdata.tilewidth
         th = self.tmxdata.tileheight
         if tile != 0:
