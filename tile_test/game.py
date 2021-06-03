@@ -146,8 +146,9 @@ class GameContext:
         pygame.draw.rect(self.off_screen, (0,0,255), p_screen_pos)
         #pygame.draw.rect(self.off_screen, (0,0,255), self.player_rect)
 
-        # for r in self.debug_rects:
-        #     pygame.draw.rect(self.off_screen, (255,255,255), r.move(p_screen_pos.topleft), width=1)
+        map_offset = (self.player_rect.x-ScreenWidth/2, self.player_rect.y-ScreenHeight/2)
+        for r in self.debug_rects:
+            pygame.draw.rect(self.off_screen, (255,255,255), r.move((-map_offset[0], -map_offset[1])), width=1)
 
         txt = self.font.render("Score: " + str(self.score), False, pygame.Color('white'))
         self.off_screen.blit(txt, (5, 5))
