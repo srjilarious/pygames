@@ -83,6 +83,11 @@ class GameContext:
         self.off_screen = pygame.surface.Surface((ScreenWidth, ScreenHeight))
 
         self.player = remgine.Actor({
+            "standing": remgine.Frames(RamonaSheet, 
+            [ 
+                remgine.Frame(400, (468, 124, 44, 65)),
+                remgine.Frame(400, (468, 190, 44, 65)),
+            ]),
             "walking": remgine.Frames(RamonaSheet, 
             [ 
                 remgine.Frame(200, (0, 182, 54, 67)),
@@ -93,7 +98,18 @@ class GameContext:
                 remgine.Frame(200, (216, 182, 54, 67)),
                 remgine.Frame(200, (446, 0, 54, 67)),
                 remgine.Frame(200, (270, 182, 54, 67)),
-            ])
+            ]),
+            "hit": remgine.Frames(RamonaSheet, 
+            [ 
+                remgine.Frame(60, (0, 0, 98, 91)),
+                remgine.Frame(60, (98, 0, 98, 91)),
+                remgine.Frame(60, (0, 91, 98, 91)),
+                remgine.Frame(60, (98, 91, 98, 91)),
+                remgine.Frame(60, (196, 0, 98, 91)),
+                remgine.Frame(60, (196, 91, 98, 91)),
+                remgine.Frame(60, (294, 0, 98, 91)),
+                remgine.Frame(60, (294, 91, 98, 91)),
+            ], next_state="standing", play_type=remgine.PlayType.Once)
         })
         self.font = pygame.font.Font(None, 15)
         self.running = True
@@ -112,22 +128,53 @@ class GameContext:
         self.player.move(0, Speed)
 
     def move_left(self):
+        self.player.flip_horz = True
         self.player.move(-Speed, 0)
 
     def move_right(self):
+        self.player.flip_horz = False
         self.player.move(Speed, 0)
 
     def update_game(self):
         pressed_keys = pygame.key.get_pressed()
 
-        if pressed_keys[K_UP]:
-            self.move_up()
-        if pressed_keys[K_DOWN]:
-            self.move_down()
-        if pressed_keys[K_LEFT]:
-            self.move_left()
-        if pressed_keys[K_RIGHT]:
-            self.move_right()
+        if self.player.curr_state_key != "hit":
+            moved = False
+            if pressed_keys[K_UP]:
+                moved = True
+                self.move_up()
+            if pressed_keys[K_DOWN]:
+                moved = True
+                self.move_down()
+            if pressed_keys[K_LEFT]:
+                moved = True
+                self.move_left()
+            if pressed_keys[K_RIGHT]:
+                moved = True
+                self.move_right()
+
+            if self.joystick is not None:
+                jx, jy = self.joystick.get_hat(0)
+                if jy > 0:
+                    moved = True
+                    self.move_up()
+                if jy < 0:
+                    moved = True
+                    self.move_down()
+                if jx < 0:
+                    moved = True
+                    self.move_left()
+                if jx > 0:
+                    moved = True
+                    self.move_right()
+
+            if moved:
+                if self.player.curr_state_key != "walking":
+                    self.player.curr_state_key = "walking"
+            else:
+                self.player.curr_state_key = "standing"
+        if pressed_keys[K_f]:
+            self.player.curr_state_key = "hit";
         if pressed_keys[K_RETURN]:
             self.player_x = PlayerStartX
             self.player_y = PlayerStartY
@@ -135,16 +182,6 @@ class GameContext:
             self.running = False
 
 
-        if self.joystick is not None:
-            jx, jy = self.joystick.get_hat(0)
-            if jy > 0:
-                self.move_up()
-            if jy < 0:
-                self.move_down()
-            if jx < 0:
-                self.move_left()
-            if jx > 0:
-                self.move_right()
 
         self.player.update(10)
 
@@ -153,7 +190,7 @@ class GameContext:
         self.off_screen.fill((0,0,0))
 
         # Draw sprite to off_screen buffer
-        self.off_screen.blit(self.player.image, self.player.rect)
+        self.player.draw(self.off_screen)
 
         self.screen.blit(pygame.transform.scale(self.off_screen, self.screen.get_rect().size), (0, 0))
 
