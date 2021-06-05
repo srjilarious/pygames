@@ -6,6 +6,10 @@ from pygame import time
 
 from pygame.locals import *
 
+import sys
+sys.path.append("..")
+import remgine
+
 WindowWidth = 1920
 WindowHeight = 1080
 ScreenWidth = 192
@@ -17,55 +21,59 @@ Speed = 0.5
 pygame.init()
 RamonaSheet = pygame.image.load("ramona_test.png")
 
-class Frame:
-    def __init__(self, time, rect):
-        self.time = time
-        self.rect = rect
-        self.surface = None
+# class Frame:
+#     def __init__(self, time, rect):
+#         self.time = time
+#         self.rect = rect
+#         self.surface = None
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.sprite_sheet = RamonaSheet
+# class Player(pygame.sprite.Sprite):
+#     def __init__(self):
+#         pygame.sprite.Sprite.__init__(self)
+#         self.sprite_sheet = RamonaSheet
 
-        self.frames = [ 
-            Frame(200, (0, 182, 54, 67)),
-            Frame(200, (54, 182, 54, 67)),
-            Frame(200, (108, 182, 54, 67)),
-            Frame(200, (162, 182, 54, 67)),
-            Frame(200, (392, 0, 54, 67)),
-            Frame(200, (216, 182, 54, 67)),
-            Frame(200, (446, 0, 54, 67)),
-            Frame(200, (270, 182, 54, 67)),
-        ]
+#         self.frames = [ 
+#             Frame(200, (0, 182, 54, 67)),
+#             Frame(200, (54, 182, 54, 67)),
+#             Frame(200, (108, 182, 54, 67)),
+#             Frame(200, (162, 182, 54, 67)),
+#             Frame(200, (392, 0, 54, 67)),
+#             Frame(200, (216, 182, 54, 67)),
+#             Frame(200, (446, 0, 54, 67)),
+#             Frame(200, (270, 182, 54, 67)),
+#         ]
 
-        for i, frame in enumerate(self.frames):
-            frame.surface = self.sprite_sheet.subsurface(frame.rect)
+#         for i, frame in enumerate(self.frames):
+#             frame.surface = self.sprite_sheet.subsurface(frame.rect)
 
-        self.curr_frame_idx = 0
-        self.curr_frame_time = 0
-        self.position = (PlayerStartX, PlayerStartY)
-        # self.rect = pygame.Rect(PlayerStartX, PlayerStartY, PlayerWidth, PlayerHeight)
-        self.layer = 0
+#         self.curr_frame_idx = 0
+#         self.curr_frame_time = 0
+#         self.position = (float(PlayerStartX), float(PlayerStartY))
+#         # self.rect = pygame.Rect(PlayerStartX, PlayerStartY, PlayerWidth, PlayerHeight)
+#         self.layer = 0
 
-    @property 
-    def curr_frame(self):
-        return self.frames[self.curr_frame_idx]
-    @property
-    def image(self):
-        return self.curr_frame.surface
+#     @property 
+#     def curr_frame(self):
+#         return self.frames[self.curr_frame_idx]
 
-    @property
-    def rect(self):
-        return pygame.Rect(self.position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
+#     @property
+#     def image(self):
+#         return self.curr_frame.surface
 
-    def update(self, time_elapsed_ms):
-        self.curr_frame_time += time_elapsed_ms
-        if self.curr_frame_time > self.curr_frame.time:
-            self.curr_frame_time -= self.curr_frame.time
-            self.curr_frame_idx += 1
-            if self.curr_frame_idx >= len(self.frames):
-                self.curr_frame_idx = 0
+#     @property
+#     def rect(self):
+#         return pygame.Rect(self.position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
+
+#     def move(self, x, y):
+#         self.position = (self.position[0] + x, self.position[1] + y)
+
+#     def update(self, time_elapsed_ms):
+#         self.curr_frame_time += time_elapsed_ms
+#         if self.curr_frame_time > self.curr_frame.time:
+#             self.curr_frame_time -= self.curr_frame.time
+#             self.curr_frame_idx += 1
+#             if self.curr_frame_idx >= len(self.frames):
+#                 self.curr_frame_idx = 0
         
 
 class GameContext:
@@ -74,7 +82,19 @@ class GameContext:
         self.screen = pygame.display.set_mode([WindowWidth, WindowHeight], flags=HWSURFACE|DOUBLEBUF)
         self.off_screen = pygame.surface.Surface((ScreenWidth, ScreenHeight))
 
-        self.player = Player()
+        self.player = remgine.Actor({
+            "walking": remgine.Frames(RamonaSheet, 
+            [ 
+                remgine.Frame(200, (0, 182, 54, 67)),
+                remgine.Frame(200, (54, 182, 54, 67)),
+                remgine.Frame(200, (108, 182, 54, 67)),
+                remgine.Frame(200, (162, 182, 54, 67)),
+                remgine.Frame(200, (392, 0, 54, 67)),
+                remgine.Frame(200, (216, 182, 54, 67)),
+                remgine.Frame(200, (446, 0, 54, 67)),
+                remgine.Frame(200, (270, 182, 54, 67)),
+            ])
+        })
         self.font = pygame.font.Font(None, 15)
         self.running = True
 
@@ -86,16 +106,16 @@ class GameContext:
 
 
     def move_up(self):
-        self.player.rect = self.player.rect.move(0, -Speed)
+        self.player.move(0, -Speed)
 
     def move_down(self):
-        self.player.rect = self.player.rect.move(0, Speed)
+        self.player.move(0, Speed)
 
     def move_left(self):
-        self.player.rect = self.player.rect.move(-Speed, 0)
+        self.player.move(-Speed, 0)
 
     def move_right(self):
-        self.player.rect = self.player.rect.move(Speed, 0)
+        self.player.move(Speed, 0)
 
     def update_game(self):
         pressed_keys = pygame.key.get_pressed()
@@ -136,6 +156,7 @@ class GameContext:
         self.off_screen.blit(self.player.image, self.player.rect)
 
         self.screen.blit(pygame.transform.scale(self.off_screen, self.screen.get_rect().size), (0, 0))
+
         # Flip the display
         pygame.display.flip()
 
