@@ -86,7 +86,7 @@ class GameContext:
             "standing": remgine.Frames(RamonaSheet, 
             [ 
                 remgine.Frame(400, (468, 124, 44, 65)),
-                remgine.Frame(400, (468, 190, 44, 65)),
+                remgine.Frame(400, (468, 190, 44, 65), (1, 0), (-1, 0)),
             ]),
             "walking": remgine.Frames(RamonaSheet, 
             [ 
@@ -101,14 +101,14 @@ class GameContext:
             ]),
             "hit": remgine.Frames(RamonaSheet, 
             [ 
-                remgine.Frame(60, (0, 0, 98, 91)),
-                remgine.Frame(60, (98, 0, 98, 91)),
-                remgine.Frame(60, (0, 91, 98, 91)),
-                remgine.Frame(60, (98, 91, 98, 91)),
-                remgine.Frame(60, (196, 0, 98, 91)),
-                remgine.Frame(60, (196, 91, 98, 91)),
-                remgine.Frame(60, (294, 0, 98, 91)),
-                remgine.Frame(60, (294, 91, 98, 91)),
+                remgine.Frame(60, (0, 0, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (98, 0, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (0, 91, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (98, 91, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (196, 0, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (196, 91, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (294, 0, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (294, 91, 98, 91), (4, 24), (38, 24)),
             ], next_state="standing", play_type=remgine.PlayType.Once)
         })
         self.font = pygame.font.Font(None, 15)
@@ -169,10 +169,10 @@ class GameContext:
                     self.move_right()
 
             if moved:
-                if self.player.curr_state_key != "walking":
-                    self.player.curr_state_key = "walking"
+                self.player.curr_state_key = "walking"
             else:
                 self.player.curr_state_key = "standing"
+
         if pressed_keys[K_f]:
             self.player.curr_state_key = "hit";
         if pressed_keys[K_RETURN]:

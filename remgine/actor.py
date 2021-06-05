@@ -2,9 +2,12 @@ import pygame
 from enum import Enum
 
 class Frame:
-    def __init__(self, time, rect):
+    def __init__(self, time, rect, gravity=(0,0), left_gravity=(0,0)):
         self.time = time
         self.rect = rect
+        self.gravity = gravity
+        # Hack, should center drawing
+        self.left_gravity = left_gravity
         self.surface = None
 
 class PlayType(Enum):
@@ -13,7 +16,7 @@ class PlayType(Enum):
 
 
 class Frames:
-    def __init__(self, sprite_sheet, frames, next_state=None, play_type=PlayType.Once):
+    def __init__(self, sprite_sheet, frames, next_state=None, play_type=PlayType.Loop):
         self.frames = frames
         self.sprite_sheet = sprite_sheet
         self.next_state_key = next_state
@@ -57,12 +60,23 @@ class Actor(pygame.sprite.Sprite):
         return pygame.Rect(self.position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
 
     @property
+    def draw_position(self):
+        if(self.flip_horz):
+            return (self.position[0] - self.curr_frame.left_gravity[0], self.position[1] - self.curr_frame.left_gravity[1])
+        else:
+            return (self.position[0] - self.curr_frame.gravity[0], self.position[1] - self.curr_frame.gravity[1])
+
+    @property
     def curr_state_key(self):
         return self._curr_state_key
     
     @curr_state_key.setter
     def curr_state_key(self, value):
-        self._curr_state_key = value
+        if self._curr_state_key != value:
+            self._curr_state_key = value
+            self.reset_state()
+            
+    def reset_state(self):
         self.curr_frame_time = 0
         self.curr_frame_idx = 0
 
@@ -71,9 +85,9 @@ class Actor(pygame.sprite.Sprite):
 
     def draw(self, screen):
         if self.flip_horz or self.flip_vert:
-            screen.blit(pygame.transform.flip(self.image, self.flip_horz, self.flip_vert), self.rect)
+            screen.blit(pygame.transform.flip(self.image, self.flip_horz, self.flip_vert), self.draw_position)
         else:
-            screen.blit(self.image, self.rect)
+            screen.blit(self.image, self.draw_position)
 
     def update(self, time_elapsed_ms):
         self.curr_frame_time += time_elapsed_ms
