@@ -6,7 +6,7 @@
   <property name="obj_switch_85_4" value="door_102_14"/>
   <property name="player_start_x" value="3"/>
   <property name="player_start_y" value="4"/>
-  <property name="start_script" value="Content/level1.lua"/>
+  <property name="start_script" value="assets.scripts.level1"/>
  </properties>
  <tileset firstgid="1" name="main_tiles" tilewidth="32" tileheight="32" tilecount="256" columns="16">
   <image source="mario_grassish2.png" width="512" height="512"/>

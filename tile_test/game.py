@@ -2,7 +2,7 @@
 import pygame
 import math
 import random
-
+import importlib
 from pygame.locals import *
 import pytmx
 from pytmx.util_pygame import load_pygame
@@ -41,6 +41,12 @@ class GameContext:
         self.player = Player()
         
         self.tmxdata = load_pygame("level1.tmx")
+
+        level_script = self.tmxdata.properties["start_script"]
+        if level_script is not None:
+            print("Got a level script from the level: " + level_script)
+            level_module = importlib.import_module(level_script)
+            level_module.start()
         self.map_data = pyscroll.TiledMapData(self.tmxdata)
         self.main_tiles = self.tmxdata.get_layer_by_name("main_layer")
         
