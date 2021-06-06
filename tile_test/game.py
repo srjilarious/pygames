@@ -59,12 +59,9 @@ class GameContext:
         self.group.add(self.player)
 
         # Create an object grid and register our map objects into it.
-        self.obj_grid = remgine.ObjectGrid(self.tmxdata.width, self.tmxdata.height, self.tmxdata.tilewidth, self.tmxdata.tileheight)
-        obj_group = self.tmxdata.get_layer_by_name("test_objects")
-        for obj in obj_group:
-            print("Inserting object {} at {}, {} with gid {}".format(obj.name, obj.x, obj.y, obj.gid))
-            self.obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj.name)
-
+        self.collectible_obj_grid = self.create_obj_grid("collectible_objects")
+        self.interaction_obj_grid = self.create_obj_grid("interaction_objects")
+        
         if pygame.joystick.get_count() > 0:
             self.joystick = joystick = pygame.joystick.Joystick(0)
             self.joystick.init()
@@ -72,10 +69,22 @@ class GameContext:
             self.joystick = None
         self.debug_rects = []
 
+    def create_obj_grid(self, layer_name):
+        obj_grid = remgine.ObjectGrid(self.tmxdata.width, self.tmxdata.height, self.tmxdata.tilewidth, self.tmxdata.tileheight)
+        obj_group = self.tmxdata.get_layer_by_name(layer_name)
+        for obj in obj_group:
+            print("Inserting object {} at {}, {} with name {}, from {}".format(obj.name, obj.x, obj.y, obj.name, layer_name))
+            obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj.name)
+
+        return obj_grid
+
     def check_obj_collisions(self, objs):
         if len(objs) > 0:
             for o in objs:
                 print("Hit object: {}", o)
+
+    def tile_pos(self, point):
+        return (int(point[0] / self.tmxdata.tilewidth), int(point[1] / self.tmxdata.tileheight))
 
     def move_up(self):
         # self.player_y = max(self.player_radius, self.player_y - Speed)
@@ -86,8 +95,8 @@ class GameContext:
         if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
             self.player.rect = new_rect
         # Check object collisions
-        self.check_obj_collisions(self.obj_grid.get(tx_l, ty))
-        self.check_obj_collisions(self.obj_grid.get(tx_r, ty))
+        self.check_obj_collisions(self.collectible_obj_grid.get(tx_l, ty))
+        self.check_obj_collisions(self.collectible_obj_grid.get(tx_r, ty))
         
         
     def move_down(self):
@@ -99,8 +108,8 @@ class GameContext:
             self.player.rect = new_rect
         
         # Check object collisions
-        self.check_obj_collisions(self.obj_grid.get(tx_l, ty))
-        self.check_obj_collisions(self.obj_grid.get(tx_r, ty))
+        self.check_obj_collisions(self.collectible_obj_grid.get(tx_l, ty))
+        self.check_obj_collisions(self.collectible_obj_grid.get(tx_r, ty))
 
     def move_left(self):
         new_rect = self.player.rect.move(-Speed, 0)
@@ -111,8 +120,8 @@ class GameContext:
             self.player.rect = new_rect
 
         # Check object collisions
-        self.check_obj_collisions(self.obj_grid.get(tx, ty_t))
-        self.check_obj_collisions(self.obj_grid.get(tx, ty_b))
+        self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_t))
+        self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_b))
 
     def move_right(self):
         new_rect = self.player.rect.move(Speed, 0)
@@ -123,9 +132,9 @@ class GameContext:
             self.player.rect = new_rect
 
         # Check object collisions
-        self.check_obj_collisions(self.obj_grid.get(tx, ty_t))
-        self.check_obj_collisions(self.obj_grid.get(tx, ty_b))
-        
+        self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_t))
+        self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_b))
+
     def update_game(self):
         pressed_keys = pygame.key.get_pressed()
 
@@ -146,6 +155,18 @@ class GameContext:
         if pressed_keys[K_RETURN]:
             self.player_x = PlayerStartX
             self.player_y = PlayerStartY
+        if pressed_keys[K_SPACE]:
+            tl = self.tile_pos(self.player.rect.topleft)
+            tr = self.tile_pos(self.player.rect.topright)
+            bl = self.tile_pos(self.player.rect.bottomleft)
+            br = self.tile_pos(self.player.rect.bottomright)
+            obj_list = []
+            for p in [tl, tr, bl, br]:
+                obj_list = obj_list + self.interaction_obj_grid.get(p[0], p[1])
+
+            for o in obj_list:
+                print("Interacted with {}".format(o))
+
         if pressed_keys[K_h]:
             self.create_dot()
         if pressed_keys[K_c]:
