@@ -8,6 +8,10 @@ import pytmx
 from pytmx.util_pygame import load_pygame
 import pyscroll
 
+import sys
+sys.path.append("..")
+import remgine
+
 WindowWidth = 1920
 WindowHeight = 1080
 ScreenWidth = 768
@@ -54,12 +58,24 @@ class GameContext:
         self.group = pyscroll.PyscrollGroup(map_layer=self.map_layer)
         self.group.add(self.player)
 
+        # Create an object grid and register our map objects into it.
+        self.obj_grid = remgine.ObjectGrid(self.tmxdata.width, self.tmxdata.height, self.tmxdata.tilewidth, self.tmxdata.tileheight)
+        obj_group = self.tmxdata.get_layer_by_name("test_objects")
+        for obj in obj_group:
+            print("Inserting object {} at {}, {} with gid {}".format(obj.name, obj.x, obj.y, obj.gid))
+            self.obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj.name)
+
         if pygame.joystick.get_count() > 0:
             self.joystick = joystick = pygame.joystick.Joystick(0)
             self.joystick.init()
         else:
             self.joystick = None
         self.debug_rects = []
+
+    def check_obj_collisions(self, objs):
+        if len(objs) > 0:
+            for o in objs:
+                print("Hit object: {}", o)
 
     def move_up(self):
         # self.player_y = max(self.player_radius, self.player_y - Speed)
@@ -69,6 +85,10 @@ class GameContext:
         tx_r = int(new_rect.right / self.tmxdata.tilewidth)
         if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
             self.player.rect = new_rect
+        # Check object collisions
+        self.check_obj_collisions(self.obj_grid.get(tx_l, ty))
+        self.check_obj_collisions(self.obj_grid.get(tx_r, ty))
+        
         
     def move_down(self):
         new_rect = self.player.rect.move(0, Speed)
@@ -77,6 +97,10 @@ class GameContext:
         tx_r = int(new_rect.right / self.tmxdata.tilewidth)
         if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
             self.player.rect = new_rect
+        
+        # Check object collisions
+        self.check_obj_collisions(self.obj_grid.get(tx_l, ty))
+        self.check_obj_collisions(self.obj_grid.get(tx_r, ty))
 
     def move_left(self):
         new_rect = self.player.rect.move(-Speed, 0)
@@ -86,6 +110,10 @@ class GameContext:
         if not self.check_collide_tile(new_rect, tx, ty_t) and not self.check_collide_tile(new_rect, tx, ty_b):
             self.player.rect = new_rect
 
+        # Check object collisions
+        self.check_obj_collisions(self.obj_grid.get(tx, ty_t))
+        self.check_obj_collisions(self.obj_grid.get(tx, ty_b))
+
     def move_right(self):
         new_rect = self.player.rect.move(Speed, 0)
         tx = int(new_rect.right / self.tmxdata.tilewidth)
@@ -94,6 +122,10 @@ class GameContext:
         if not self.check_collide_tile(new_rect, tx, ty_t) and not self.check_collide_tile(new_rect, tx, ty_b):
             self.player.rect = new_rect
 
+        # Check object collisions
+        self.check_obj_collisions(self.obj_grid.get(tx, ty_t))
+        self.check_obj_collisions(self.obj_grid.get(tx, ty_b))
+        
     def update_game(self):
         pressed_keys = pygame.key.get_pressed()
 
