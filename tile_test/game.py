@@ -74,14 +74,14 @@ class GameContext:
         obj_group = self.tmxdata.get_layer_by_name(layer_name)
         for obj in obj_group:
             print("Inserting object {} at {}, {} with name {}, from {}".format(obj.name, obj.x, obj.y, obj.name, layer_name))
-            obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj.name)
+            obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj)
 
         return obj_grid
 
     def check_obj_collisions(self, objs):
         if len(objs) > 0:
             for o in objs:
-                print("Hit object: {}", o)
+                print("Hit object: " + o.name)
 
     def tile_pos(self, point):
         return (int(point[0] / self.tmxdata.tilewidth), int(point[1] / self.tmxdata.tileheight))
@@ -166,11 +166,9 @@ class GameContext:
 
             for o in obj_list:
                 print("Interacted with {}".format(o))
+                if o.type == "hint":
+                    print("Hint: {}".format(o.properties["hint_text"]))
 
-        if pressed_keys[K_h]:
-            self.create_dot()
-        if pressed_keys[K_c]:
-            self.dots.clear()
         if pressed_keys[K_ESCAPE]:
             self.running = False
 
