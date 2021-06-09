@@ -45,8 +45,7 @@ class GameContext:
         self.running = True
         self.score = 1234
         
-        self._pressed_keys = None
-        self._last_pressed_keys = None
+        self.keyboard = remgine.Keyboard()
 
         self.player = Player()
         
@@ -142,27 +141,24 @@ class GameContext:
         self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_b))
 
     def update_game(self):
-        self._last_pressed_keys = self._pressed_keys
-        self._pressed_keys = pygame.key.get_pressed()
+        self.keyboard.update()
 
-        if (self._pressed_keys[K_UP] or 
-            self._pressed_keys[K_DOWN] or
-            self._pressed_keys[K_LEFT] or
-            self._pressed_keys[K_RIGHT]):
+
+        if self.keyboard.any_down([K_UP, K_DOWN, K_LEFT, K_RIGHT]):
             self.debug_rects.clear()
 
-        if self._pressed_keys[K_UP]:
+        if self.keyboard.down(K_UP):
             self.move_up()
-        if self._pressed_keys[K_DOWN]:
+        if self.keyboard.down(K_DOWN):
             self.move_down()
-        if self._pressed_keys[K_LEFT]:
+        if self.keyboard.down(K_LEFT):
             self.move_left()
-        if self._pressed_keys[K_RIGHT]:
+        if self.keyboard.down(K_RIGHT):
             self.move_right()
-        if self._pressed_keys[K_RETURN]:
+        if self.keyboard.down(K_RETURN):
             self.player_x = PlayerStartX
             self.player_y = PlayerStartY
-        if self._pressed_keys[K_SPACE] and not self._last_pressed_keys[K_SPACE]:
+        if self.keyboard.pressed(K_SPACE):
             obj_list = self.interaction_obj_grid.get_from_points([
                     self.player.rect.topleft,
                     self.player.rect.topright,
@@ -175,7 +171,7 @@ class GameContext:
                 if o.type == "hint":
                     print("Hint: {}".format(o.properties["hint_text"]))
 
-        if self._pressed_keys[K_ESCAPE]:
+        if self.keyboard.down(K_ESCAPE):
             self.running = False
 
         # Handle joystick input
