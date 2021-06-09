@@ -1,14 +1,17 @@
-# Simple pygame program
-import pygame
+# Tile engine pygame test
 import math
 import random
 import importlib
+import logging
+import sys
+
+import pygame
 from pygame.locals import *
+
 import pytmx
 from pytmx.util_pygame import load_pygame
 import pyscroll
 
-import sys
 sys.path.append("..")
 import remgine
 
@@ -42,6 +45,9 @@ class GameContext:
         self.running = True
         self.score = 1234
         
+        self._pressed_keys = None
+        self._last_pressed_keys = None
+
         self.player = Player()
         
         self.tmxdata = load_pygame("level1.tmx")
@@ -83,8 +89,8 @@ class GameContext:
             for o in objs:
                 print("Hit object: " + o.name)
 
-    def tile_pos(self, point):
-        return (int(point[0] / self.tmxdata.tilewidth), int(point[1] / self.tmxdata.tileheight))
+    # def tile_pos(self, point):
+    #     return (int(point[0] / self.tmxdata.tilewidth), int(point[1] / self.tmxdata.tileheight))
 
     def move_up(self):
         # self.player_y = max(self.player_radius, self.player_y - Speed)
@@ -136,40 +142,40 @@ class GameContext:
         self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_b))
 
     def update_game(self):
-        pressed_keys = pygame.key.get_pressed()
+        self._last_pressed_keys = self._pressed_keys
+        self._pressed_keys = pygame.key.get_pressed()
 
-        if (pressed_keys[K_UP] or 
-            pressed_keys[K_DOWN] or
-            pressed_keys[K_LEFT] or
-            pressed_keys[K_RIGHT]):
+        if (self._pressed_keys[K_UP] or 
+            self._pressed_keys[K_DOWN] or
+            self._pressed_keys[K_LEFT] or
+            self._pressed_keys[K_RIGHT]):
             self.debug_rects.clear()
 
-        if pressed_keys[K_UP]:
+        if self._pressed_keys[K_UP]:
             self.move_up()
-        if pressed_keys[K_DOWN]:
+        if self._pressed_keys[K_DOWN]:
             self.move_down()
-        if pressed_keys[K_LEFT]:
+        if self._pressed_keys[K_LEFT]:
             self.move_left()
-        if pressed_keys[K_RIGHT]:
+        if self._pressed_keys[K_RIGHT]:
             self.move_right()
-        if pressed_keys[K_RETURN]:
+        if self._pressed_keys[K_RETURN]:
             self.player_x = PlayerStartX
             self.player_y = PlayerStartY
-        if pressed_keys[K_SPACE]:
-            tl = self.tile_pos(self.player.rect.topleft)
-            tr = self.tile_pos(self.player.rect.topright)
-            bl = self.tile_pos(self.player.rect.bottomleft)
-            br = self.tile_pos(self.player.rect.bottomright)
-            obj_list = []
-            for p in [tl, tr, bl, br]:
-                obj_list = obj_list + self.interaction_obj_grid.get(p[0], p[1])
-
+        if self._pressed_keys[K_SPACE] and not self._last_pressed_keys[K_SPACE]:
+            obj_list = self.interaction_obj_grid.get_from_points([
+                    self.player.rect.topleft,
+                    self.player.rect.topright,
+                    self.player.rect.bottomleft,
+                    self.player.rect.bottomright
+                ])
+            
             for o in obj_list:
-                print("Interacted with {}".format(o))
+                logging.info("Interacted with {}".format(o))
                 if o.type == "hint":
                     print("Hint: {}".format(o.properties["hint_text"]))
 
-        if pressed_keys[K_ESCAPE]:
+        if self._pressed_keys[K_ESCAPE]:
             self.running = False
 
         # Handle joystick input
