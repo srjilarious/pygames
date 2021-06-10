@@ -41,8 +41,9 @@ class Actor(pygame.sprite.Sprite):
         self.position = position
         self.flip_horz = False
         self.flip_vert = False
+        self.scale = None
         self.layer = 0
-
+        self.collide_adjust = (0, 0, 0, 0)
     @property
     def curr_state(self):
         return self.states[self._curr_state_key]
@@ -53,11 +54,32 @@ class Actor(pygame.sprite.Sprite):
 
     @property
     def image(self):
-        return self.curr_frame.surface
+        surf = self.curr_frame.surface
+
+        if self.scale is not None:
+            surf = pygame.transform.scale(surf, ((self.curr_frame.rect[2]*self.scale, self.curr_frame.rect[3]*self.scale)))
+
+        if self.flip_horz or self.flip_vert:
+            surf = pygame.transform.flip(surf, self.flip_horz, self.flip_vert)
+        
+        return surf
+
+    @property
+    def collide_rect(self):
+        r = pygame.Rect(self.position[0]+self.collide_adjust[0], 
+                        self.position[1]+self.collide_adjust[1], 
+                        self.collide_adjust[2], 
+                        self.collide_adjust[3])
+        if self.scale is not None:
+            r = pygame.Rect(r.topleft, (r.width*self.scale, r.height*self.scale))
+        return r
 
     @property
     def rect(self):
-        return pygame.Rect(self.position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
+        if self.scale is not None:
+            return pygame.Rect(self.position, (self.curr_frame.rect[2]*self.scale, self.curr_frame.rect[3]*self.scale))
+        else:
+            return pygame.Rect(self.position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
 
     @property
     def draw_position(self):
@@ -75,7 +97,7 @@ class Actor(pygame.sprite.Sprite):
         if self._curr_state_key != value:
             self._curr_state_key = value
             self.reset_state()
-            
+
     def reset_state(self):
         self.curr_frame_time = 0
         self.curr_frame_idx = 0
@@ -84,10 +106,7 @@ class Actor(pygame.sprite.Sprite):
         self.position = (self.position[0] + x, self.position[1] + y)
 
     def draw(self, screen):
-        if self.flip_horz or self.flip_vert:
-            screen.blit(pygame.transform.flip(self.image, self.flip_horz, self.flip_vert), self.draw_position)
-        else:
-            screen.blit(self.image, self.draw_position)
+        screen.blit(self.image, self.draw_position)
 
     def update(self, time_elapsed_ms):
         self.curr_frame_time += time_elapsed_ms
