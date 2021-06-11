@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="150" height="42" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="248">
+<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="150" height="42" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="258">
  <properties>
   <property name="obj_switch_145_15" value="door_8_37"/>
   <property name="obj_switch_32_11" value="door_43_14"/>
@@ -501,5 +501,15 @@
   <object id="245" name="coin" gid="257" x="3648" y="1184" width="32" height="32"/>
   <object id="246" name="coin" gid="257" x="3616" y="1184" width="32" height="32"/>
   <object id="247" name="ghost" gid="258" x="3808" y="1184" width="32" height="32"/>
+  <object id="248" name="ghost" gid="258" x="736" y="768" width="32" height="32"/>
+  <object id="249" name="ghost" gid="258" x="1088" y="288" width="32" height="32"/>
+  <object id="250" name="ghost" gid="258" x="2624" y="192" width="32" height="32"/>
+  <object id="251" name="ghost" gid="258" x="4416" y="160" width="32" height="32"/>
+  <object id="252" name="ghost" gid="258" x="4448" y="224" width="32" height="32"/>
+  <object id="253" name="ghost" gid="258" x="4512" y="224" width="32" height="32"/>
+  <object id="254" name="ghost" gid="258" x="4576" y="224" width="32" height="32"/>
+  <object id="255" name="ghost" gid="258" x="4640" y="160" width="32" height="32"/>
+  <object id="256" name="ghost" gid="258" x="800" y="96" width="32" height="32"/>
+  <object id="257" name="ghost" gid="258" x="224" y="352" width="32" height="32"/>
  </objectgroup>
 </map>

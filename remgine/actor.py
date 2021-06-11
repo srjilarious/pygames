@@ -16,11 +16,12 @@ class PlayType(Enum):
 
 
 class Frames:
-    def __init__(self, sprite_sheet, frames, next_state=None, play_type=PlayType.Loop):
+    def __init__(self, sprite_sheet, frames, next_state=None, play_type=PlayType.Loop, on_done=None):
         self.frames = frames
         self.sprite_sheet = sprite_sheet
         self.next_state_key = next_state
         self.play_type = play_type
+        self.on_done = on_done
 
         # Create subsurfaces referencing our main spritesheet surface
         for i, frame in enumerate(self.frames):
@@ -108,7 +109,7 @@ class Actor(pygame.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, self.draw_position)
 
-    def update(self, time_elapsed_ms):
+    def update(self, time_elapsed_ms, context):
         self.curr_frame_time += time_elapsed_ms
 
         # Check if we should advance frames.
@@ -121,6 +122,11 @@ class Actor(pygame.sprite.Sprite):
                 self.curr_frame_idx = 0
 
                 # Check if this state transitions to another automatically.
-                if (self.curr_state.play_type == PlayType.Once and
-                    self.curr_state.next_state_key is not None):
-                    self.curr_state_key = self.curr_state.next_state_key
+                if self.curr_state.play_type == PlayType.Once:
+
+                    # Check for a state finished task
+                    if self.curr_state.on_done is not None:
+                        self.curr_state.on_done(context, self)
+
+                    if self.curr_state.next_state_key is not None:
+                        self.curr_state_key = self.curr_state.next_state_key

@@ -60,23 +60,46 @@ class GameContext:
             ]),
             "walking": remgine.Frames(SpriteSheet, 
             [ 
-                remgine.Frame(200, (368, 296, 50, 65)),
-                remgine.Frame(200, (302, 358, 50, 65)),
-                remgine.Frame(200, (420, 256, 50, 65)),
-                remgine.Frame(200, (354, 363, 50, 65)),
-                remgine.Frame(200, (420, 323, 50, 65)),
-                remgine.Frame(200, (406, 390, 50, 65)),
-                remgine.Frame(200, (458, 390, 50, 65)),
-                remgine.Frame(200, (505, 0, 50, 65)),
+                remgine.Frame(100, (368, 296, 50, 65)),
+                remgine.Frame(100, (302, 358, 50, 65)),
+                remgine.Frame(100, (420, 256, 50, 65)),
+                remgine.Frame(100, (354, 363, 50, 65)),
+                remgine.Frame(100, (420, 323, 50, 65)),
+                remgine.Frame(100, (406, 390, 50, 65)),
+                remgine.Frame(100, (458, 390, 50, 65)),
+                remgine.Frame(100, (505, 0, 50, 65)),
             ])
         }, "standing", (100, 100))
         self.player.collide_adjust = (0, 0, 50, 60)
 
+        self.GoombaWalk = remgine.Frames(SpriteSheet, [
+            remgine.Frame(150, (510, 423, 32, 30)),
+            remgine.Frame(150, (574, 359, 32, 30)),
+            remgine.Frame(150, (544, 391, 32, 30))
+        ])
+        
+        def on_goomba_killed(context, actor):
+            print("Goomba killed!!")
+            context.group.remove(actor)
+
+        self.GoombaDie = remgine.Frames(SpriteSheet, [
+                remgine.Frame(150, (506, 354, 32, 30)),
+                remgine.Frame(150, (540, 327, 32, 30)),
+                remgine.Frame(150, (540, 359, 32, 30)),
+                remgine.Frame(150, (574, 327, 32, 30)),
+                remgine.Frame(150, (510, 391, 32, 30)),
+                remgine.Frame(150, (318, 425, 32, 32))
+            ], 
+            next_state=None, 
+            play_type=remgine.PlayType.Once,
+            on_done=on_goomba_killed
+          )
+
         self.CoinFrames = remgine.Frames(SpriteSheet, [
-            remgine.Frame(400, (0, 448, 16, 16)),
-            remgine.Frame(400, (18, 448, 16, 16)),
-            remgine.Frame(400, (36, 448, 16, 16)),
-            remgine.Frame(400, (54, 448, 16, 16)),
+            remgine.Frame(100, (0, 448, 16, 16)),
+            remgine.Frame(100, (18, 448, 16, 16)),
+            remgine.Frame(100, (36, 448, 16, 16)),
+            remgine.Frame(100, (54, 448, 16, 16)),
         ])
 
         self.tmxdata = load_pygame("level1.tmx")
@@ -113,6 +136,15 @@ class GameContext:
                 obj.sprite = remgine.Actor({"normal": self.CoinFrames}, "normal", (obj.x, obj.y))
                 obj.sprite.scale = 2
                 self.group.add(obj.sprite)
+            elif obj.name == "ghost":
+                obj.sprite = remgine.Actor({
+                        "walking": self.GoombaWalk,
+                        "killed": self.GoombaDie
+                    }, 
+                    "walking", 
+                    (obj.x, obj.y)
+                )
+                self.group.add(obj.sprite)
 
             obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj)
 
@@ -125,6 +157,9 @@ class GameContext:
                 if o.name == "coin" and o.sprite in self.group:
                     self.score += 100
                     self.group.remove(o.sprite)
+                if o.name == "ghost" and o.sprite in self.group:
+                    if o.sprite.curr_state_key != "killed":
+                        o.sprite.curr_state_key = "killed"
 
     # def tile_pos(self, point):
     #     return (int(point[0] / self.tmxdata.tilewidth), int(point[1] / self.tmxdata.tileheight))
@@ -136,10 +171,10 @@ class GameContext:
         tx_l = int(new_rect.left / self.tmxdata.tilewidth)
         tx_r = int(new_rect.right / self.tmxdata.tilewidth)
         if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
-            self.player.position = (new_rect.x, new_rect.y)
-        #     self.player.position = (self.player.position[0], self.player.position[1] -Speed)
-        # else:
-        #     self.player.position = (self.player.position[0], (ty+1)*self.tmxdata.tileheight)
+            # self.player.position = (new_rect.x, new_rect.y)
+            self.player.position = (self.player.position[0], self.player.position[1] -Speed)
+        else:
+            self.player.position = (self.player.position[0], (ty+1)*self.tmxdata.tileheight)
 
         # Check object collisions
         self.check_obj_collisions(self.collectible_obj_grid.get(tx_l, ty))
@@ -153,10 +188,10 @@ class GameContext:
         tx_l = int(new_rect.left / self.tmxdata.tilewidth)
         tx_r = int(new_rect.right / self.tmxdata.tilewidth)
         if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
-            self.player.position = (new_rect.x, new_rect.y)
-        #     self.player.position = (self.player.position[0], self.player.position[1] +Speed)
-        # else:
-        #     self.player.position = (self.player.position[0], (ty-1)*self.tmxdata.tileheight-1)
+            # self.player.position = (new_rect.x, new_rect.y)
+            self.player.position = (self.player.position[0], self.player.position[1] +Speed)
+        else:
+            self.player.position = (self.player.position[0], (ty)*self.tmxdata.tileheight-1 - self.player.collide_rect[3])
         
         # Check object collisions
         self.check_obj_collisions(self.collectible_obj_grid.get(tx_l, ty))
@@ -170,7 +205,10 @@ class GameContext:
         ty_t = int(new_rect.top / self.tmxdata.tileheight)
         ty_b = int(new_rect.bottom / self.tmxdata.tileheight)
         if not self.check_collide_tile(new_rect, tx, ty_t) and not self.check_collide_tile(new_rect, tx, ty_b):
-            self.player.position = (new_rect.x, new_rect.y)
+            # self.player.position = (new_rect.x, new_rect.y)
+            self.player.position = (self.player.position[0]-Speed, self.player.position[1])
+        else:
+            self.player.position = ((tx+1)*self.tmxdata.tileheight, self.player.position[1])
 
         # Check object collisions
         self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_t))
@@ -184,7 +222,10 @@ class GameContext:
         ty_t = int(new_rect.top / self.tmxdata.tileheight)
         ty_b = int(new_rect.bottom / self.tmxdata.tileheight)
         if not self.check_collide_tile(new_rect, tx, ty_t) and not self.check_collide_tile(new_rect, tx, ty_b):
-            self.player.position = (new_rect.x, new_rect.y)
+            # self.player.position = (new_rect.x, new_rect.y)
+            self.player.position = (self.player.position[0]+Speed, self.player.position[1])
+        else:
+            self.player.position = ((tx)*self.tmxdata.tileheight - 1 - self.player.collide_rect[2], self.player.position[1])
 
         # Check object collisions
         self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_t))
@@ -252,7 +293,7 @@ class GameContext:
             self.running = False
 
         for sp in self.group:
-            sp.update(10)
+            sp.update(10, self)
         
     def check_collide_tile(self, player_rect, x, y):
         tile = self.get_main_tile(x, y)
