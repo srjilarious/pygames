@@ -6,8 +6,8 @@ from pygame.locals import *
 class Keyboard():
 
     def __init__(self):
-        self._down_keys = None
-        self._last_down_keys = None
+        self._down_keys = pygame.key.get_pressed()
+        self._last_down_keys = pygame.key.get_pressed()
 
     def update(self):
         self._last_down_keys = self._down_keys

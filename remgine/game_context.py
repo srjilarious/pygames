@@ -12,7 +12,8 @@ class GameContext:
         self.screen = pg.display.set_mode([win_size[0], win_size[1]], flags=HWSURFACE|DOUBLEBUF)
         self.off_screen = pg.surface.Surface((screen_size[0], screen_size[1]))
 
-        self.game_states = []
+        self.running = True
+        self.game_states = {}
         self.curr_game_state_key = ""
 
         self.keyboard = Keyboard()
