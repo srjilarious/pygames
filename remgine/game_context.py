@@ -1,5 +1,5 @@
 
-import .input
+from .input import Keyboard
 import pygame as pg
 from pygame.locals import *
 
@@ -15,7 +15,7 @@ class GameContext:
         self.game_states = []
         self.curr_game_state_key = ""
 
-        self.keyboard = input.Keyboard()
+        self.keyboard = Keyboard()
 
     @property
     def curr_game_state(self):

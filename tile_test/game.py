@@ -32,13 +32,6 @@ SpriteSheet = pygame.image.load("game_content5.png")
 def midpoint(a, b):
         return int(a + (b-a)/2)
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(BluePiece, (PlayerWidth, PlayerHeight))
-        self.rect = pygame.Rect(PlayerStartX, PlayerStartY, PlayerWidth, PlayerHeight)
-        self.layer = 0
-
 class GameContext:
     def __init__(self):
         # Set up the drawing window
@@ -71,6 +64,8 @@ class GameContext:
             ])
         }, "standing", (100, 100))
         self.player.collide_adjust = (0, 0, 50, 60)
+        self.player.jumping = False
+        self.player.vel_y = 0
 
         self.GoombaWalk = remgine.Frames(SpriteSheet, [
             remgine.Frame(150, (510, 423, 32, 30)),
@@ -164,17 +159,18 @@ class GameContext:
     # def tile_pos(self, point):
     #     return (int(point[0] / self.tmxdata.tilewidth), int(point[1] / self.tmxdata.tileheight))
 
-    def move_up(self):
+    def move_up(self, amount = -Speed):
         # self.player_y = max(self.player_radius, self.player_y - Speed)
-        new_rect = self.player.collide_rect.move(0, -Speed)
+        new_rect = self.player.collide_rect.move(0, amount)
         ty = int(new_rect.top / self.tmxdata.tileheight)
         tx_l = int(new_rect.left / self.tmxdata.tilewidth)
         tx_r = int(new_rect.right / self.tmxdata.tilewidth)
         if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
             # self.player.position = (new_rect.x, new_rect.y)
-            self.player.position = (self.player.position[0], self.player.position[1] -Speed)
+            self.player.position = (self.player.position[0], self.player.position[1] +amount)
         else:
             self.player.position = (self.player.position[0], (ty+1)*self.tmxdata.tileheight)
+            self.player.vel_y = 0
 
         # Check object collisions
         self.check_obj_collisions(self.collectible_obj_grid.get(tx_l, ty))
@@ -182,16 +178,18 @@ class GameContext:
         self.check_obj_collisions(self.collectible_obj_grid.get(tx_r, ty))
         
         
-    def move_down(self):
-        new_rect = self.player.collide_rect.move(0, Speed)
+    def move_down(self, amount = Speed):
+        new_rect = self.player.collide_rect.move(0, amount)
         ty = int(new_rect.bottom / self.tmxdata.tileheight)
         tx_l = int(new_rect.left / self.tmxdata.tilewidth)
         tx_r = int(new_rect.right / self.tmxdata.tilewidth)
         if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
             # self.player.position = (new_rect.x, new_rect.y)
-            self.player.position = (self.player.position[0], self.player.position[1] +Speed)
+            self.player.position = (self.player.position[0], self.player.position[1] +amount)
         else:
-            self.player.position = (self.player.position[0], (ty)*self.tmxdata.tileheight-1 - self.player.collide_rect[3])
+            self.player.position = (self.player.position[0], (ty)*self.tmxdata.tileheight -self.player.collide_rect[3])
+            self.player.jumping = False
+            self.player.vel_y = 0
         
         # Check object collisions
         self.check_obj_collisions(self.collectible_obj_grid.get(tx_l, ty))
@@ -239,18 +237,29 @@ class GameContext:
         if self.keyboard.any_down([K_UP, K_DOWN, K_LEFT, K_RIGHT]):
             self.debug_rects.clear()
 
-        if self.keyboard.down(K_UP):
+        if self.keyboard.down(K_UP) and self.player.jumping == False:
             moved = True
-            self.move_up()
-        if self.keyboard.down(K_DOWN):
-            moved = True
-            self.move_down()
+            self.player.jumping = True
+            self.player.vel_y = -7
+
+        # if self.keyboard.down(K_DOWN):
+            # moved = True
+
         if self.keyboard.down(K_LEFT):
             moved = True
             self.move_left()
         if self.keyboard.down(K_RIGHT):
             moved = True
             self.move_right()
+
+        if self.player.vel_y < 5:
+            self.player.vel_y += 0.1
+
+        if self.player.vel_y < 0:
+            self.move_up(int(self.player.vel_y))
+        else:
+            self.move_down(int(self.player.vel_y))
+
 
         # Handle joystick input
         if self.joystick is not None:
