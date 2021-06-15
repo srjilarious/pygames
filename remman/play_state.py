@@ -27,6 +27,9 @@ class PlayState(remgine.GameState):
         self.running = True
         self.score = 0
         
+        self.player = remgine.Actor({
+            "right": MsPacManFrames
+        })
         # self.player = remgine.Actor({
         #     "standing": remgine.Frames(SpriteSheet, 
         #     [ 
@@ -48,7 +51,7 @@ class PlayState(remgine.GameState):
         # self.player.collide_adjust = (0, 0, 50, 60)
         # self.player.jumping = False
         # self.player.vel_y = 0
-
+        self.player.position = (8, 8)
         # self.GoombaWalk = remgine.Frames(SpriteSheet, [
         #     remgine.Frame(150, (510, 423, 32, 30)),
         #     remgine.Frame(150, (574, 359, 32, 30)),
@@ -79,7 +82,7 @@ class PlayState(remgine.GameState):
         #     remgine.Frame(100, (54, 448, 16, 16)),
         # ])
 
-        self.tmxdata = load_pygame("level1.tmx")
+        self.tmxdata = load_pygame("assets/level1.tmx")
 
         level_script = self.tmxdata.properties.get("start_script")
         if level_script is not None:
@@ -92,7 +95,7 @@ class PlayState(remgine.GameState):
         
         self.map_layer = pyscroll.BufferedRenderer(self.map_data, (ScreenWidth, ScreenHeight), clamp_camera=False)
         self.group = pyscroll.PyscrollGroup(map_layer=self.map_layer)
-        # self.group.add(self.player)
+        self.group.add(self.player)
 
         # Create an object grid and register our map objects into it.
         # self.collectible_obj_grid = self.create_obj_grid("collectible_objects")
