@@ -98,7 +98,7 @@ class PlayState(remgine.GameState):
         self.group.add(self.player)
 
         # Create an object grid and register our map objects into it.
-        # self.collectible_obj_grid = self.create_obj_grid("collectible_objects")
+        self.collectible_obj_grid = self.create_obj_grid("dots")
         # self.interaction_obj_grid = self.create_obj_grid("interaction_objects")
         
         # if pygame.joystick.get_count() > 0:
@@ -112,10 +112,16 @@ class PlayState(remgine.GameState):
         obj_grid = remgine.ObjectGrid(self.tmxdata.width, self.tmxdata.height, self.tmxdata.tilewidth, self.tmxdata.tileheight)
         obj_group = self.tmxdata.get_layer_by_name(layer_name)
         for obj in obj_group:
-            print("Inserting object {} at {}, {} with name {}, from {}".format(obj.name, obj.x, obj.y, obj.name, layer_name))
-            if obj.name == "coin":
-                obj.sprite = remgine.Actor({"normal": self.CoinFrames}, "normal", (obj.x, obj.y))
-                obj.sprite.scale = 2
+            print("Inserting object {} at {}, {} with name '{}', from {}".format(obj.type, obj.x, obj.y, obj.name, layer_name))
+            if obj.type == "dot":
+                print("Adding dot.")
+                obj.sprite = remgine.Actor({"normal": DotFrames}, "normal", (obj.x, obj.y))
+                obj.sprite.scale = 1
+                self.group.add(obj.sprite)
+            elif obj.type == "power_dot":
+                print("Adding power dot.")
+                obj.sprite = remgine.Actor({"normal": PowerDotFrames}, "normal", (obj.x, obj.y))
+                obj.sprite.scale = 1
                 self.group.add(obj.sprite)
             elif obj.name == "ghost":
                 obj.sprite = remgine.Actor({

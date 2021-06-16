@@ -38,3 +38,13 @@ MsPacManFrames = remgine.Frames(SpriteSheet,
         remgine.Frame(200, (112, 48, 16, 16)),
         remgine.Frame(200, (96, 64, 16, 16))
     ])
+
+DotFrames = remgine.Frames(SpriteSheet,
+    [
+        remgine.Frame(200, (0, 8, 8, 8))
+    ])
+
+PowerDotFrames = remgine.Frames(SpriteSheet,
+    [
+        remgine.Frame(200, (8, 8, 8, 8))
+    ])
