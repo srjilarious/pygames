@@ -29,7 +29,7 @@ class PlayState(remgine.GameState):
         
         self.player = remgine.Actor({
             "right": MsPacManFrames
-        })
+        }, "right")
         # self.player = remgine.Actor({
         #     "standing": remgine.Frames(SpriteSheet, 
         #     [ 
@@ -137,13 +137,19 @@ class PlayState(remgine.GameState):
 
         return obj_grid
 
-    def check_obj_collisions(self, objs):
+    def check_obj_collisions(self, tx, ty):
+        objs = self.collectible_obj_grid.get(tx, ty)
         if len(objs) > 0:
             for o in objs:
-                print("Hit object: " + o.name)
-                if o.name == "coin" and o.sprite in self.group:
+                print("Hit object: '{}'".format(o.type))
+                if o.type == "dot" and o.sprite in self.group:
                     self.score += 100
                     self.group.remove(o.sprite)
+                    objs.remove(o)
+                if o.type == "power_dot" and o.sprite in self.group:
+                    self.score += 500
+                    self.group.remove(o.sprite)
+                    objs.remove(o)
                 if o.name == "ghost" and o.sprite in self.group:
                     if o.sprite.curr_state_key != "killed":
                         o.sprite.curr_state_key = "killed"
@@ -165,9 +171,9 @@ class PlayState(remgine.GameState):
             self.player.vel_y = 0
 
         # Check object collisions
-        self.check_obj_collisions(self.collectible_obj_grid.get(tx_l, ty))
-        self.check_obj_collisions(self.collectible_obj_grid.get(midpoint(tx_l, tx_r), ty))
-        self.check_obj_collisions(self.collectible_obj_grid.get(tx_r, ty))
+        self.check_obj_collisions(tx_l, ty)
+        self.check_obj_collisions(midpoint(tx_l, tx_r), ty)
+        self.check_obj_collisions(tx_r, ty)
         
         
     def move_down(self, amount = Speed):
@@ -180,13 +186,13 @@ class PlayState(remgine.GameState):
             self.player.position = (self.player.position[0], self.player.position[1] +amount)
         else:
             self.player.position = (self.player.position[0], (ty)*self.tmxdata.tileheight -self.player.collide_rect[3])
-            self.player.jumping = False
+            # self.player.jumping = False
             self.player.vel_y = 0
         
         # Check object collisions
-        self.check_obj_collisions(self.collectible_obj_grid.get(tx_l, ty))
-        self.check_obj_collisions(self.collectible_obj_grid.get(midpoint(tx_l, tx_r), ty))
-        self.check_obj_collisions(self.collectible_obj_grid.get(tx_r, ty))
+        self.check_obj_collisions(tx_l, ty)
+        self.check_obj_collisions(midpoint(tx_l, tx_r), ty)
+        self.check_obj_collisions(tx_r, ty)
 
     def move_left(self):
         self.player.flip_horz = True
@@ -201,9 +207,9 @@ class PlayState(remgine.GameState):
             self.player.position = ((tx+1)*self.tmxdata.tileheight, self.player.position[1])
 
         # Check object collisions
-        self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_t))
-        self.check_obj_collisions(self.collectible_obj_grid.get(tx, midpoint(ty_t, ty_b)))
-        self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_b))
+        self.check_obj_collisions(tx, ty_t)
+        self.check_obj_collisions(tx, midpoint(ty_t, ty_b))
+        self.check_obj_collisions(tx, ty_b)
 
     def move_right(self):
         self.player.flip_horz = False
@@ -218,9 +224,9 @@ class PlayState(remgine.GameState):
             self.player.position = ((tx)*self.tmxdata.tileheight - 1 - self.player.collide_rect[2], self.player.position[1])
 
         # Check object collisions
-        self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_t))
-        self.check_obj_collisions(self.collectible_obj_grid.get(tx, midpoint(ty_t, ty_b)))
-        self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_b))
+        self.check_obj_collisions(tx, ty_t)
+        self.check_obj_collisions(tx, midpoint(ty_t, ty_b))
+        self.check_obj_collisions(tx, ty_b)
 
     def update(self):
         kb = self.context.keyboard
@@ -229,13 +235,15 @@ class PlayState(remgine.GameState):
         if kb.any_down([K_UP, K_DOWN, K_LEFT, K_RIGHT]):
             self.debug_rects.clear()
 
-        if kb.down(K_UP) and self.player.jumping == False:
+        if kb.down(K_UP):
             moved = True
+            self.move_up()
             # self.player.jumping = True
             # self.player.vel_y = -7
 
-        # if kb.down(K_DOWN):
-            # moved = True
+        if kb.down(K_DOWN):
+            moved = True
+            self.move_down()
 
         if kb.down(K_LEFT):
             moved = True

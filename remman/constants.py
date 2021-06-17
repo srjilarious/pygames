@@ -1,15 +1,15 @@
 import pygame as pg
 import remgine
 
-WindowWidth = 1920
-WindowHeight = 1080
-ScreenWidth = 768
-ScreenHeight = 432
+WindowWidth = 1280
+WindowHeight = 720
+ScreenWidth = 192
+ScreenHeight = 108
 PlayerStartX = 64
 PlayerStartY = 64
 PlayerWidth = 32
 PlayerHeight = 32
-Speed = 2
+Speed = 1
 
 # BluePiece = pg.image.load("blue_piece.png")
 SpriteSheet = pg.image.load("assets/pac-tiles.png")
