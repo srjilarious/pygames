@@ -29,5 +29,8 @@ if __name__ == "__main__":
         context.update()
         context.render()
 
+        if context.keyboard.pressed(K_ESCAPE):
+            context.running = False
+
     # Done! Time to quit.
     pg.quit()
