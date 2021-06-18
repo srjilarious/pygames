@@ -48,40 +48,12 @@ class PlayState(remgine.GameState):
         #         remgine.Frame(100, (505, 0, 50, 65)),
         #     ])
         # }, "standing", (100, 100))
-        self.player.collide_adjust = (0, 0, 8, 8)
-        self.player.scale = 0.5
+        self.player.collide_adjust = (5, 5, 7, 7)
+        self.player.render_scale = 0.8
         # self.player.jumping = False
         # self.player.vel_y = 0
         self.player.position = (8, 8)
-        # self.GoombaWalk = remgine.Frames(SpriteSheet, [
-        #     remgine.Frame(150, (510, 423, 32, 30)),
-        #     remgine.Frame(150, (574, 359, 32, 30)),
-        #     remgine.Frame(150, (544, 391, 32, 30))
-        # ])
-        
-        # def on_goomba_killed(context, actor):
-        #     print("Goomba killed!!")
-        #     context.group.remove(actor)
 
-        # self.GoombaDie = remgine.Frames(SpriteSheet, [
-        #         remgine.Frame(150, (506, 354, 32, 30)),
-        #         remgine.Frame(150, (540, 327, 32, 30)),
-        #         remgine.Frame(150, (540, 359, 32, 30)),
-        #         remgine.Frame(150, (574, 327, 32, 30)),
-        #         remgine.Frame(150, (510, 391, 32, 30)),
-        #         remgine.Frame(150, (318, 425, 32, 32))
-        #     ], 
-        #     next_state=None, 
-        #     play_type=remgine.PlayType.Once,
-        #     on_done=on_goomba_killed
-        #   )
-
-        # self.CoinFrames = remgine.Frames(SpriteSheet, [
-        #     remgine.Frame(100, (0, 448, 16, 16)),
-        #     remgine.Frame(100, (18, 448, 16, 16)),
-        #     remgine.Frame(100, (36, 448, 16, 16)),
-        #     remgine.Frame(100, (54, 448, 16, 16)),
-        # ])
 
         self.tmxdata = load_pygame("assets/level1.tmx")
 
@@ -334,9 +306,9 @@ class PlayState(remgine.GameState):
 
         #pygame.draw.rect(self.off_screen, (0,0,255), self.player.rect)
 
-        # map_offset = (self.player.rect.x-ScreenWidth/2, self.player.rect.y-ScreenHeight/2)
-        # for r in self.debug_rects:
-        #     pg.draw.rect(self.off_screen, (255,255,255), r.move((-map_offset[0], -map_offset[1])), width=1)
+        map_offset = (0,0)#(self.player.rect.x-ScreenWidth/2, self.player.rect.y-ScreenHeight/2)
+        for r in self.debug_rects:
+            pg.draw.rect(self.context.off_screen, (255,255,255), r.move((-map_offset[0], -map_offset[1])), width=1)
 
         # txt = self.font.render("Score: " + str(self.score), False, pygame.Color('white'))
         # self.off_screen.blit(txt, (5, 5))

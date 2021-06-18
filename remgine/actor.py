@@ -42,7 +42,8 @@ class Actor(pygame.sprite.Sprite):
         self.position = position
         self.flip_horz = False
         self.flip_vert = False
-        self.scale = None
+        self.collide_scale = None
+        self.render_scale = None
         self.layer = 0
         self.collide_adjust = (0, 0, 0, 0)
     @property
@@ -57,8 +58,8 @@ class Actor(pygame.sprite.Sprite):
     def image(self):
         surf = self.curr_frame.surface
 
-        if self.scale is not None:
-            surf = pygame.transform.scale(surf, ((int(self.curr_frame.rect[2]*self.scale), int(self.curr_frame.rect[3]*self.scale))))
+        if self.render_scale is not None:
+            surf = pygame.transform.scale(surf, ((int(self.curr_frame.rect[2]*self.render_scale), int(self.curr_frame.rect[3]*self.render_scale))))
 
         if self.flip_horz or self.flip_vert:
             surf = pygame.transform.flip(surf, self.flip_horz, self.flip_vert)
@@ -67,27 +68,31 @@ class Actor(pygame.sprite.Sprite):
 
     @property
     def collide_rect(self):
-        r = pygame.Rect(self.position[0]+self.collide_adjust[0], 
-                        self.position[1]+self.collide_adjust[1], 
+        r = pygame.Rect(self.int_position[0]+self.collide_adjust[0], 
+                        self.int_position[1]+self.collide_adjust[1], 
                         self.collide_adjust[2], 
                         self.collide_adjust[3])
-        if self.scale is not None:
-            r = pygame.Rect(r.topleft, (int(r.width*self.scale), int(r.height*self.scale)))
+        if self.collide_scale is not None:
+            r = pygame.Rect(r.topleft, (int(r.width*self.collide_scale), int(r.height*self.collide_scale)))
         return r
 
     @property
     def rect(self):
-        if self.scale is not None:
-            return pygame.Rect(self.position, (int(self.curr_frame.rect[2]*self.scale), int(self.curr_frame.rect[3]*self.scale)))
+        if self.collide_scale is not None:
+            return pygame.Rect(self.int_position, (int(self.curr_frame.rect[2]*self.collide_scale), int(self.curr_frame.rect[3]*self.collide_scale)))
         else:
-            return pygame.Rect(self.position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
+            return pygame.Rect(self.int_position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
+
+    @property 
+    def int_position(self):
+        return (int(self.position[0]), int(self.position[1]))
 
     @property
     def draw_position(self):
         if(self.flip_horz):
-            return (self.position[0] - self.curr_frame.left_gravity[0], self.position[1] - self.curr_frame.left_gravity[1])
+            return (self.int_position[0] - self.curr_frame.left_gravity[0], self.int_position[1] - self.curr_frame.left_gravity[1])
         else:
-            return (self.position[0] - self.curr_frame.gravity[0], self.position[1] - self.curr_frame.gravity[1])
+            return (self.int_position[0] - self.curr_frame.gravity[0], self.int_position[1] - self.curr_frame.gravity[1])
 
     @property
     def curr_state_key(self):
