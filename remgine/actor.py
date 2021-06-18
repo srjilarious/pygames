@@ -58,7 +58,7 @@ class Actor(pygame.sprite.Sprite):
         surf = self.curr_frame.surface
 
         if self.scale is not None:
-            surf = pygame.transform.scale(surf, ((self.curr_frame.rect[2]*self.scale, self.curr_frame.rect[3]*self.scale)))
+            surf = pygame.transform.scale(surf, ((int(self.curr_frame.rect[2]*self.scale), int(self.curr_frame.rect[3]*self.scale))))
 
         if self.flip_horz or self.flip_vert:
             surf = pygame.transform.flip(surf, self.flip_horz, self.flip_vert)
@@ -72,13 +72,13 @@ class Actor(pygame.sprite.Sprite):
                         self.collide_adjust[2], 
                         self.collide_adjust[3])
         if self.scale is not None:
-            r = pygame.Rect(r.topleft, (r.width*self.scale, r.height*self.scale))
+            r = pygame.Rect(r.topleft, (int(r.width*self.scale), int(r.height*self.scale)))
         return r
 
     @property
     def rect(self):
         if self.scale is not None:
-            return pygame.Rect(self.position, (self.curr_frame.rect[2]*self.scale, self.curr_frame.rect[3]*self.scale))
+            return pygame.Rect(self.position, (int(self.curr_frame.rect[2]*self.scale), int(self.curr_frame.rect[3]*self.scale)))
         else:
             return pygame.Rect(self.position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
 

@@ -9,7 +9,7 @@ PlayerStartX = 64
 PlayerStartY = 64
 PlayerWidth = 32
 PlayerHeight = 32
-Speed = 1
+Speed = 0.2
 
 # BluePiece = pg.image.load("blue_piece.png")
 SpriteSheet = pg.image.load("assets/pac-tiles.png")

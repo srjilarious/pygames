@@ -48,7 +48,8 @@ class PlayState(remgine.GameState):
         #         remgine.Frame(100, (505, 0, 50, 65)),
         #     ])
         # }, "standing", (100, 100))
-        # self.player.collide_adjust = (0, 0, 50, 60)
+        self.player.collide_adjust = (0, 0, 8, 8)
+        self.player.scale = 0.5
         # self.player.jumping = False
         # self.player.vel_y = 0
         self.player.position = (8, 8)

@@ -11,6 +11,12 @@ class ObjectGrid:
         """Returns any objects registered at the tile col/row"""
         return self._arr[tile_row][tile_col]
     
+    def remove(self, obj, tile_col, tile_row):
+        """Removes an object registered at the tile col/row"""
+        l = self._arr[tile_row][tile_col]
+        if obj in l:
+            l.remove(obj)
+
     def insert_obj(self, rect, gid):
         """Takes a rectangle in world coordinates and inserts the object into the tile cells"""
         start_tx = int(rect[0] / self.tile_width)
