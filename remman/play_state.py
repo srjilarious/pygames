@@ -48,8 +48,9 @@ class PlayState(remgine.GameState):
         #         remgine.Frame(100, (505, 0, 50, 65)),
         #     ])
         # }, "standing", (100, 100))
-        self.player.collide_adjust = (0, 0, 8, 8)
-        self.player.scale = 0.5
+        self.player.collide_adjust = (0, 0, 10, 10)
+        self.player.scale = 0.8
+        self.player.gravity = (8, 8)
         # self.player.jumping = False
         # self.player.vel_y = 0
         self.player.position = (8, 8)
@@ -113,7 +114,7 @@ class PlayState(remgine.GameState):
         obj_grid = remgine.ObjectGrid(self.tmxdata.width, self.tmxdata.height, self.tmxdata.tilewidth, self.tmxdata.tileheight)
         obj_group = self.tmxdata.get_layer_by_name(layer_name)
         for obj in obj_group:
-            print("Inserting object {} at {}, {} with name '{}', from {}".format(obj.type, obj.x, obj.y, obj.name, layer_name))
+            print(f"Inserting object {obj.type} at {obj.x}, {obj.y} with name '{obj.name}', from {layer_name}")
             if obj.type == "dot":
                 print("Adding dot.")
                 obj.sprite = remgine.Actor({"normal": DotFrames}, "normal", (obj.x, obj.y))
@@ -142,7 +143,7 @@ class PlayState(remgine.GameState):
         objs = self.collectible_obj_grid.get(tx, ty)
         if len(objs) > 0:
             for o in objs:
-                print("Hit object: '{}'".format(o.type))
+                print(f"Hit object: '{o.type}'")
                 if o.type == "dot" and o.sprite in self.group:
                     self.score += 100
                     self.group.remove(o.sprite)
@@ -161,6 +162,7 @@ class PlayState(remgine.GameState):
     def move_up(self, amount = -Speed):
         # self.player_y = max(self.player_radius, self.player_y - Speed)
         new_rect = self.player.collide_rect.move(0, amount)
+        new_rect.top -= 1
         ty = int(new_rect.top / self.tmxdata.tileheight)
         tx_l = int(new_rect.left / self.tmxdata.tilewidth)
         tx_r = int(new_rect.right / self.tmxdata.tilewidth)
@@ -179,6 +181,7 @@ class PlayState(remgine.GameState):
         
     def move_down(self, amount = Speed):
         new_rect = self.player.collide_rect.move(0, amount)
+        new_rect.bottom += 1
         ty = int(new_rect.bottom / self.tmxdata.tileheight)
         tx_l = int(new_rect.left / self.tmxdata.tilewidth)
         tx_r = int(new_rect.right / self.tmxdata.tilewidth)
@@ -198,6 +201,7 @@ class PlayState(remgine.GameState):
     def move_left(self):
         self.player.flip_horz = True
         new_rect = self.player.collide_rect.move(-Speed, 0)
+        new_rect.left -= 1
         tx = int(new_rect.left / self.tmxdata.tilewidth)
         ty_t = int(new_rect.top / self.tmxdata.tileheight)
         ty_b = int(new_rect.bottom / self.tmxdata.tileheight)
@@ -215,6 +219,7 @@ class PlayState(remgine.GameState):
     def move_right(self):
         self.player.flip_horz = False
         new_rect = self.player.collide_rect.move(Speed, 0)
+        new_rect.right += 1
         tx = int(new_rect.right / self.tmxdata.tilewidth)
         ty_t = int(new_rect.top / self.tmxdata.tileheight)
         ty_b = int(new_rect.bottom / self.tmxdata.tileheight)
@@ -222,7 +227,7 @@ class PlayState(remgine.GameState):
             # self.player.position = (new_rect.x, new_rect.y)
             self.player.position = (self.player.position[0]+Speed, self.player.position[1])
         else:
-            self.player.position = ((tx)*self.tmxdata.tileheight - 1 - self.player.collide_rect[2], self.player.position[1])
+            self.player.position = ((tx)*self.tmxdata.tileheight - self.player.collide_rect[2], self.player.position[1])
 
         # Check object collisions
         self.check_obj_collisions(tx, ty_t)
@@ -285,7 +290,7 @@ class PlayState(remgine.GameState):
             for o in obj_list:
                 logging.info("Interacted with {}".format(o))
                 if o.type == "hint":
-                    print("Hint: {}".format(o.properties["hint_text"]))
+                    print(f"Hint: {o.properties['hint_text']}")
 
         if kb.down(K_ESCAPE):
             self.running = False

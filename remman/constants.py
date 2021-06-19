@@ -3,13 +3,13 @@ import remgine
 
 WindowWidth = 1280
 WindowHeight = 720
-ScreenWidth = 192
-ScreenHeight = 108
+ScreenWidth = 384
+ScreenHeight = 216
 PlayerStartX = 64
 PlayerStartY = 64
 PlayerWidth = 32
 PlayerHeight = 32
-Speed = 0.2
+Speed = 0.4
 
 # BluePiece = pg.image.load("blue_piece.png")
 SpriteSheet = pg.image.load("assets/pac-tiles.png")
@@ -34,9 +34,9 @@ RedGhostDownFrames = remgine.Frames(SpriteSheet,
 
 MsPacManFrames = remgine.Frames(SpriteSheet,
     [
-        remgine.Frame(200, (96, 48, 16, 16)),
-        remgine.Frame(200, (112, 48, 16, 16)),
-        remgine.Frame(200, (96, 64, 16, 16))
+        remgine.Frame(200, (96, 48, 16, 16), (4,3),(2,3)),
+        remgine.Frame(200, (112, 48, 16, 16), (4,3), (2,3)),
+        remgine.Frame(200, (96, 64, 16, 16), (4,3), (2,3))
     ])
 
 DotFrames = remgine.Frames(SpriteSheet,
