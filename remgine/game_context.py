@@ -13,7 +13,10 @@ class GameContext:
         self.off_screen = pg.surface.Surface((screen_size[0], screen_size[1]))
 
         self.running = True
+        self._game_state_paused = False
         self.game_states = {}
+        self.components = {}
+
         self.curr_game_state_key = ""
 
         self.keyboard = Keyboard()
@@ -22,16 +25,32 @@ class GameContext:
     def curr_game_state(self):
         return self.game_states.get(self.curr_game_state_key, None)
 
+    @property
+    def paused(self):
+        return self._game_state_paused
+    
+    @paused.setter
+    def paused(self, value):
+        self._game_state_paused = value
+        if self.curr_game_state is not None:
+            self.curr_game_state.on_pause_changed(value)
+
     def update(self):
         self.keyboard.update()
 
-        if self.curr_game_state is not None:
+        if self.curr_game_state is not None and not self.paused:
             self.curr_game_state.update()
+
+        for (k, v) in self.components.items():
+            v.update()
 
     def render(self):
         if self.curr_game_state is not None:
             self.curr_game_state.render()
         
+        for (k, v) in self.components.items():
+            v.render()
+
         self.screen.blit(pg.transform.scale(self.off_screen, self.screen.get_rect().size), (0, 0))
         # Flip the display
         pg.display.flip()
