@@ -3,7 +3,9 @@ import math
 import random
 import importlib
 import logging
+from remman.constants import Direction
 import sys
+
 
 import pygame as pg
 from pygame.locals import *
@@ -50,7 +52,9 @@ class PlayState(remgine.GameState):
         # }, "standing", (100, 100))
         self.player.collide_adjust = (0, 0, 8, 8)
         self.player.scale = 0.8
-        self.player.gravity = (8, 8)
+        self.player.gravity = (8, 12)
+        self.player.direction = Direction.Stopped
+        self.player.next_direction = Direction.Stopped
         # self.player.jumping = False
         # self.player.vel_y = 0
         self.player.position = (8, 8)
@@ -132,6 +136,7 @@ class PlayState(remgine.GameState):
     #     return (int(point[0] / self.tmxdata.tilewidth), int(point[1] / self.tmxdata.tileheight))
 
     def move_up(self, amount = -Speed):
+        moved = False
         # self.player_y = max(self.player_radius, self.player_y - Speed)
         new_rect = self.player.collide_rect.move(0, amount)
         new_rect.top -= 1
@@ -141,6 +146,7 @@ class PlayState(remgine.GameState):
         if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
             # self.player.position = (new_rect.x, new_rect.y)
             self.player.position = (self.player.position[0], self.player.position[1] +amount)
+            moved = True
         else:
             self.player.position = (self.player.position[0], (ty+1)*self.tmxdata.tileheight)
             self.player.vel_y = 0
@@ -149,9 +155,10 @@ class PlayState(remgine.GameState):
         self.check_obj_collisions(tx_l, ty)
         self.check_obj_collisions(midpoint(tx_l, tx_r), ty)
         self.check_obj_collisions(tx_r, ty)
-        
+        return moved
         
     def move_down(self, amount = Speed):
+        moved = False
         new_rect = self.player.collide_rect.move(0, amount)
         new_rect.bottom += 1
         ty = int(new_rect.bottom / self.tmxdata.tileheight)
@@ -160,6 +167,7 @@ class PlayState(remgine.GameState):
         if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
             # self.player.position = (new_rect.x, new_rect.y)
             self.player.position = (self.player.position[0], self.player.position[1] +amount)
+            moved = True
         else:
             self.player.position = (self.player.position[0], (ty)*self.tmxdata.tileheight -self.player.collide_rect[3])
             # self.player.jumping = False
@@ -169,8 +177,10 @@ class PlayState(remgine.GameState):
         self.check_obj_collisions(tx_l, ty)
         self.check_obj_collisions(midpoint(tx_l, tx_r), ty)
         self.check_obj_collisions(tx_r, ty)
+        return moved
 
     def move_left(self):
+        moved = False
         self.player.flip_horz = True
         new_rect = self.player.collide_rect.move(-Speed, 0)
         new_rect.left -= 1
@@ -180,6 +190,7 @@ class PlayState(remgine.GameState):
         if not self.check_collide_tile(new_rect, tx, ty_t) and not self.check_collide_tile(new_rect, tx, ty_b):
             # self.player.position = (new_rect.x, new_rect.y)
             self.player.position = (self.player.position[0]-Speed, self.player.position[1])
+            moved = True
         else:
             self.player.position = ((tx+1)*self.tmxdata.tileheight, self.player.position[1])
 
@@ -187,8 +198,10 @@ class PlayState(remgine.GameState):
         self.check_obj_collisions(tx, ty_t)
         self.check_obj_collisions(tx, midpoint(ty_t, ty_b))
         self.check_obj_collisions(tx, ty_b)
+        return moved
 
     def move_right(self):
+        moved = False
         self.player.flip_horz = False
         new_rect = self.player.collide_rect.move(Speed, 0)
         new_rect.right += 1
@@ -198,6 +211,7 @@ class PlayState(remgine.GameState):
         if not self.check_collide_tile(new_rect, tx, ty_t) and not self.check_collide_tile(new_rect, tx, ty_b):
             # self.player.position = (new_rect.x, new_rect.y)
             self.player.position = (self.player.position[0]+Speed, self.player.position[1])
+            moved = True
         else:
             self.player.position = ((tx)*self.tmxdata.tileheight - self.player.collide_rect[2], self.player.position[1])
 
@@ -205,30 +219,41 @@ class PlayState(remgine.GameState):
         self.check_obj_collisions(tx, ty_t)
         self.check_obj_collisions(tx, midpoint(ty_t, ty_b))
         self.check_obj_collisions(tx, ty_b)
+        return moved
 
     def update(self):
         kb = self.context.keyboard
 
-        moved = False
         if kb.any_down([K_UP, K_DOWN, K_LEFT, K_RIGHT]):
             self.debug_rects.clear()
 
         if kb.down(K_UP):
-            moved = True
-            self.move_up()
-            # self.player.jumping = True
-            # self.player.vel_y = -7
+            self.player.next_direction = Direction.Up
+            
+        if self.player.direction == Direction.Up or self.player.next_direction == Direction.Up:
+            if self.move_up():
+                self.player.direction = Direction.Up
 
         if kb.down(K_DOWN):
-            moved = True
-            self.move_down()
+            self.player.next_direction = Direction.Down
+            
+        if self.player.direction == Direction.Down or self.player.next_direction == Direction.Down:
+            if self.move_down():
+                self.player.direction = Direction.Down
 
         if kb.down(K_LEFT):
-            moved = True
-            self.move_left()
+            self.player.next_direction = Direction.Left
+            
+        if self.player.direction == Direction.Left or self.player.next_direction == Direction.Left:
+            if self.move_left():
+                self.player.direction = Direction.Left
+
         if kb.down(K_RIGHT):
-            moved = True
-            self.move_right()
+            self.player.next_direction = Direction.Right
+            
+        if self.player.direction == Direction.Right or self.player.next_direction == Direction.Right:
+            if self.move_right():
+                self.player.direction = Direction.Right
 
         # Handle joystick input
         # if self.joystick is not None:

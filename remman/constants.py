@@ -1,5 +1,6 @@
 import pygame as pg
 import remgine
+import enum
 
 WindowWidth = 1280
 WindowHeight = 720
@@ -9,7 +10,14 @@ PlayerStartX = 64
 PlayerStartY = 64
 PlayerWidth = 32
 PlayerHeight = 32
-Speed = 0.4
+Speed = 0.1
+
+class Direction(enum.Enum):
+    Stopped = 0
+    Up = 1
+    Down = 2
+    Left = 3
+    Right = 4
 
 # BluePiece = pg.image.load("blue_piece.png")
 SpriteSheet = pg.image.load("assets/pac-tiles.png")
