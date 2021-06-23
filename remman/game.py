@@ -20,7 +20,8 @@ if __name__ == "__main__":
     context.game_states["play_state"] = PlayState(context)
     context.curr_game_state_key = "play_state"
 
-    context.components["console"] = remgine.console.Console(context)
+    console = remgine.console.Console(context)
+    context.overlay_components["console"] = console
 
     while context.running:
         # Did the user click the window close button?
@@ -36,7 +37,6 @@ if __name__ == "__main__":
         if context.keyboard.pressed(K_ESCAPE):
             context.running = False
         if context.keyboard.pressed(K_BACKQUOTE):
-            console = context.components["console"]
             console.activated = not console.activated
 
     # Done! Time to quit.

@@ -16,6 +16,7 @@ class GameContext:
         self._game_state_paused = False
         self.game_states = {}
         self.components = {}
+        self.overlay_components = {}
 
         self.curr_game_state_key = ""
 
@@ -43,6 +44,9 @@ class GameContext:
 
         for (k, v) in self.components.items():
             v.update()
+            
+        for (k, v) in self.overlay_components.items():
+            v.update()
 
     def render(self):
         if self.curr_game_state is not None:
@@ -52,6 +56,11 @@ class GameContext:
             v.render()
 
         self.screen.blit(pg.transform.scale(self.off_screen, self.screen.get_rect().size), (0, 0))
+        
+        # Overlay components render at the window resolution
+        for (k, v) in self.overlay_components.items():
+            v.render()
+
         # Flip the display
         pg.display.flip()
     
