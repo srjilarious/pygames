@@ -32,31 +32,12 @@ class PlayState(remgine.GameState):
         self.player = remgine.Actor({
             "right": MsPacManFrames
         }, "right")
-        # self.player = remgine.Actor({
-        #     "standing": remgine.Frames(SpriteSheet, 
-        #     [ 
-        #         remgine.Frame(400, (557, 0, 42, 65)),
-        #         remgine.Frame(400, (557, 68, 42, 65), (1, 0), (-1, 0)),
-        #     ]),
-        #     "walking": remgine.Frames(SpriteSheet, 
-        #     [ 
-        #         remgine.Frame(100, (368, 296, 50, 65)),
-        #         remgine.Frame(100, (302, 358, 50, 65)),
-        #         remgine.Frame(100, (420, 256, 50, 65)),
-        #         remgine.Frame(100, (354, 363, 50, 65)),
-        #         remgine.Frame(100, (420, 323, 50, 65)),
-        #         remgine.Frame(100, (406, 390, 50, 65)),
-        #         remgine.Frame(100, (458, 390, 50, 65)),
-        #         remgine.Frame(100, (505, 0, 50, 65)),
-        #     ])
-        # }, "standing", (100, 100))
+
         self.player.collide_adjust = (0, 0, 8, 8)
         self.player.scale = 0.8
         self.player.gravity = (8, 12)
         self.player.direction = Direction.Stopped
         self.player.next_direction = Direction.Stopped
-        # self.player.jumping = False
-        # self.player.vel_y = 0
         self.player.position = (8, 8)
 
 
