@@ -44,10 +44,11 @@ class GameContext:
 
         for (k, v) in self.components.items():
             v.update()
-            
+
         for (k, v) in self.overlay_components.items():
             v.update()
 
+        self.keyboard.post_update()
     def render(self):
         if self.curr_game_state is not None:
             self.curr_game_state.render()

@@ -10,9 +10,10 @@ class Console(GameComponent):
         self.font = font
         if self.font is None:
             self.font = pg.font.Font("assets/AmigaTopaz.ttf", 30)
+        self._line = ""
 
     def update(self):
-        pass
+        self._line += self._context.keyboard.text_buffer
 
     @property
     def activated(self):
@@ -34,6 +35,6 @@ class Console(GameComponent):
                 )
             pg.draw.rect(self._console_surf, (40, 40, 220, 180), console_rect)
 
-            txt = self.font.render("What an awesome Console!!!", False, pg.Color('white'))
+            txt = self.font.render(self._line, False, pg.Color('white'))
             self._console_surf.blit(txt, (5, 5))
             self._context.screen.blit(self._console_surf, (0, 0))

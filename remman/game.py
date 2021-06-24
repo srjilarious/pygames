@@ -24,12 +24,17 @@ if __name__ == "__main__":
     context.overlay_components["console"] = console
 
     while context.running:
+
         # Did the user click the window close button?
         for event in pg.event.get():
             if event.type == QUIT:
                 context.running = False
             elif event.type == VIDEORESIZE:
                 context.screen = pg.display.set_mode(event.size, flags=HWSURFACE|DOUBLEBUF)
+            elif event.type == KEYDOWN:
+                context.keyboard.mark_text_key_down(event)
+            elif event.type == KEYUP:
+                context.keyboard.mark_text_key_up(event)
 
         context.update()
         context.render()
