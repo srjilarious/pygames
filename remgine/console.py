@@ -1,3 +1,4 @@
+from pygame.constants import K_BACKSPACE, KMOD_NONE, K_RETURN
 from remgine.game_component import GameComponent
 import pygame as pg
 
@@ -10,10 +11,19 @@ class Console(GameComponent):
         self.font = font
         if self.font is None:
             self.font = pg.font.Font("assets/AmigaTopaz.ttf", 30)
+        self.lines = []
         self._line = ""
 
     def update(self):
-        self._line += self._context.keyboard.text_buffer
+        for k in self._context.keyboard.text_buffer:
+            # if k.mod == KMOD_NONE:
+            if k.key == K_BACKSPACE:
+                self._line = self._line[:-1]
+            if k.key == K_RETURN:
+                self.lines.append(self._line)
+                self._line = ""
+            elif k.unicode != '':
+                self._line += k.unicode
 
     @property
     def activated(self):
@@ -35,6 +45,17 @@ class Console(GameComponent):
                 )
             pg.draw.rect(self._console_surf, (40, 40, 220, 180), console_rect)
 
+            # Draw the input line at the bottom first
             txt = self.font.render(self._line, False, pg.Color('white'))
-            self._console_surf.blit(txt, (5, 5))
+            curr_y = int(self._context.win_size[1]/2) - txt.get_size()[1]
+            self._console_surf.blit(txt, (5, curr_y))
+
+            for l in reversed(self.lines):
+                txt = self.font.render(l, False, pg.Color('white'))
+                curr_y -= int(txt.get_size()[1])
+                self._console_surf.blit(txt, (5, curr_y))
+
+                if(curr_y < -txt.get_size()[1]):
+                    break
+
             self._context.screen.blit(self._console_surf, (0, 0))

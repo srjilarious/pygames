@@ -10,22 +10,22 @@ class Keyboard():
         self._down_keys = pygame.key.get_pressed()
         self._last_down_keys = pygame.key.get_pressed()
         self._text_keys = collections.defaultdict()
-        self.text_buffer = ""
+        self.text_buffer = []
 
     def update(self):
         self._last_down_keys = self._down_keys
         self._down_keys = pygame.key.get_pressed()
 
     def post_update(self):
-        self.text_buffer = ""
+        self.text_buffer = []
 
     def mark_text_key_down(self, k):
         if k.unicode is None:
             return
         
         if k.key not in self._text_keys:
-            print(f"Adding key '{k.unicode}' to text buffer")
-            self.text_buffer += k.unicode
+            # print(f"Adding key '{k.unicode}' to text buffer")
+            self.text_buffer.append(k)
 
         # Rest any timing for this key.
         self._text_keys[k.key] = (k, 0)
