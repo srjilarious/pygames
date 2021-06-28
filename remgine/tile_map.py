@@ -8,6 +8,7 @@ import pytmx
 from pytmx.util_pygame import load_pygame
 import pyscroll
 import importlib
+from remgine.object_grid import ObjectGrid
 
 class TileMap:
     """
@@ -33,6 +34,8 @@ class TileMap:
         self.group = pyscroll.PyscrollGroup(
                 map_layer=buffered_renderer
             )
+        self.obj_grids = {}
+
 
     def check_move_left(self, actor, amount):
         """
@@ -43,15 +46,26 @@ class TileMap:
         actor.flip_horz = True
         new_rect = actor.collide_rect.move(-amount, 0)
         new_rect.left -= 1
+
         tx = int(new_rect.left / self.tmxdata.tilewidth)
-        ty_t = int(new_rect.top / self.tmxdata.tileheight)
-        ty_b = int(new_rect.bottom / self.tmxdata.tileheight)
-        if not self.check_collide_tile(new_rect, tx, ty_t) and not self.check_collide_tile(new_rect, tx, ty_b):
+        tys = range(
+            int(new_rect.top / self.tmxdata.tileheight),
+            int((new_rect.bottom + self.tmxdata.tileheight+1) / self.tmxdata.tileheight)
+            )
+        
+        # Check for tile collisions along line of interest
+        hit = False
+        for ty in tys:
+            if self.check_collide_tile(new_rect, tx, ty):
+                move_pos = ((tx+1)*self.tmxdata.tileheight, actor.position[1])
+                hit = True
+                moved = False
+                break
+        
+        # If we didn't hit any tile, then we can move.
+        if not hit:
             move_pos = (actor.position[0]-amount, actor.position[1])
             moved = True
-        else:
-            move_pos = ((tx+1)*self.tmxdata.tileheight, actor.position[1])
-        
         return (moved, move_pos)
     
     def check_move_right(self, actor, amount):
@@ -63,15 +77,27 @@ class TileMap:
         actor.flip_horz = False
         new_rect = actor.collide_rect.move(amount, 0)
         new_rect.right += 1
+
         tx = int(new_rect.right / self.tmxdata.tilewidth)
-        ty_t = int(new_rect.top / self.tmxdata.tileheight)
-        ty_b = int(new_rect.bottom / self.tmxdata.tileheight)
-        if not self.check_collide_tile(new_rect, tx, ty_t) and not self.check_collide_tile(new_rect, tx, ty_b):
-            # self.player.position = (new_rect.x, new_rect.y)
+        tys = range(
+            int(new_rect.top / self.tmxdata.tileheight),
+            int((new_rect.bottom + self.tmxdata.tileheight+1) / self.tmxdata.tileheight)
+            )
+        
+        # Check for tile collisions along line of interest
+        hit = False
+        for ty in tys:
+            if self.check_collide_tile(new_rect, tx, ty):
+                move_pos = ((tx)*self.tmxdata.tileheight - actor.collide_rect[2], actor.position[1])
+                hit = True
+                moved = False
+                break
+        
+        # If we didn't hit any tile, then we can move.
+        if not hit:
             move_pos = (actor.position[0]+amount, actor.position[1])
             moved = True
-        else:
-            move_pos = ((tx)*self.tmxdata.tileheight - actor.collide_rect[2], actor.position[1])
+
         return (moved, move_pos)
 
     
@@ -85,13 +111,25 @@ class TileMap:
         new_rect = actor.collide_rect.move(0, amount)
         new_rect.top -= 1
         ty = int(new_rect.top / self.tmxdata.tileheight)
-        tx_l = int(new_rect.left / self.tmxdata.tilewidth)
-        tx_r = int(new_rect.right / self.tmxdata.tilewidth)
-        if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
+        txs = range(
+            int(new_rect.left / self.tmxdata.tilewidth),
+            int((new_rect.right + self.tmxdata.tilewidth+1) / self.tmxdata.tilewidth)
+            )
+        
+        # Check for tile collisions along line of interest
+        hit = False
+        for tx in txs:
+            if self.check_collide_tile(new_rect, tx, ty):
+                move_pos = (actor.position[0], (ty+1)*self.tmxdata.tileheight)
+                hit = True
+                moved = False
+                break
+        
+        # If we didn't hit any tile, then we can move.
+        if not hit:
             move_pos = (actor.position[0], actor.position[1] +amount)
             moved = True
-        else:
-            move_pos = (actor.position[0], (ty+1)*self.tmxdata.tileheight)
+            
         return (moved, move_pos)
     
     def check_move_down(self, actor, amount):
@@ -103,13 +141,25 @@ class TileMap:
         new_rect = actor.collide_rect.move(0, amount)
         new_rect.bottom += 1
         ty = int(new_rect.bottom / self.tmxdata.tileheight)
-        tx_l = int(new_rect.left / self.tmxdata.tilewidth)
-        tx_r = int(new_rect.right / self.tmxdata.tilewidth)
-        if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
+        txs = range(
+            int(new_rect.left / self.tmxdata.tilewidth),
+            int((new_rect.right + self.tmxdata.tilewidth+1) / self.tmxdata.tilewidth)
+            )
+        
+        # Check for tile collisions along line of interest
+        hit = False
+        for tx in txs:
+            if self.check_collide_tile(new_rect, tx, ty):
+                move_pos = (actor.position[0], (ty)*self.tmxdata.tileheight -actor.collide_rect[3])
+                hit = True
+                moved = False
+                break
+        
+        # If we didn't hit any tile, then we can move.
+        if not hit:
             move_pos = (actor.position[0], actor.position[1] +amount)
             moved = True
-        else:
-            move_pos = (actor.position[0], (ty)*self.tmxdata.tileheight -actor.collide_rect[3])
+            
         return (moved, move_pos)
 
     def check_collide_tile(self, player_rect, x, y):
@@ -136,3 +186,27 @@ class TileMap:
 
     def get_main_tile(self, x, y):
         return self.main_tiles.data[int(y)][int(x)]
+
+    def create_obj_grid(self, layer_name, callback):
+        """
+        Creates an object grid for tile aligned objects from a layer.
+        layer_name: The layer from the tile map to iterate over
+        callback: A function that handles creating a sprite type object given the object reference.
+        """
+        obj_grid = ObjectGrid(
+                self.tmxdata.width, 
+                self.tmxdata.height, 
+                self.tmxdata.tilewidth, 
+                self.tmxdata.tileheight
+            )
+        obj_group = self.tmxdata.get_layer_by_name(layer_name)
+
+        for obj in obj_group:
+            # print(f"Inserting object {obj.type} at {obj.x}, {obj.y} with name '{obj.name}', from {layer_name}")
+            sprite = callback(obj)
+            if sprite is not None:
+                obj.sprite = sprite
+                self.group.add(obj.sprite)
+            obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj)
+        self.obj_grids[layer_name] = obj_grid
+        return obj_grid

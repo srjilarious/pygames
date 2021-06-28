@@ -21,6 +21,25 @@ import remgine
 def midpoint(a, b):
         return int(a + (b-a)/2)
 
+def game_obj_create_cb(obj):
+    if obj.type == "dot":
+        print("Adding dot.")
+        sprite = remgine.Actor({"normal": DotFrames}, "normal", (obj.x, obj.y))
+        sprite.scale = 1
+    elif obj.type == "power_dot":
+        print("Adding power dot.")
+        sprite = remgine.Actor({"normal": PowerDotFrames}, "normal", (obj.x, obj.y))
+        sprite.scale = 1
+    elif obj.name == "ghost":
+        sprite = remgine.Actor({
+                "walking": self.GoombaWalk,
+                "killed": self.GoombaDie
+            }, 
+            "walking", 
+            (obj.x, obj.y)
+        )
+    return sprite
+
 class PlayState(remgine.GameState):
     def __init__(self, context):
         remgine.GameState.__init__(self, context)
@@ -62,46 +81,14 @@ class PlayState(remgine.GameState):
         self.map.group.add(self.player)
 
         # Create an object grid and register our map objects into it.
-        # self.collectible_obj_grid = self.create_obj_grid("dots")
+        self.collectible_obj_grid = self.map.create_obj_grid("dots", game_obj_create_cb)
 
-
-        # self.interaction_obj_grid = self.create_obj_grid("interaction_objects")
-        
         # if pygame.joystick.get_count() > 0:
         #     self.joystick = joystick = pygame.joystick.Joystick(0)
         #     self.joystick.init()
         # else:
         #     self.joystick = None
         self.debug_rects = []
-
-    def create_obj_grid(self, layer_name):
-        obj_grid = remgine.ObjectGrid(self.tmxdata.width, self.tmxdata.height, self.tmxdata.tilewidth, self.tmxdata.tileheight)
-        obj_group = self.tmxdata.get_layer_by_name(layer_name)
-        for obj in obj_group:
-            print(f"Inserting object {obj.type} at {obj.x}, {obj.y} with name '{obj.name}', from {layer_name}")
-            if obj.type == "dot":
-                print("Adding dot.")
-                obj.sprite = remgine.Actor({"normal": DotFrames}, "normal", (obj.x, obj.y))
-                obj.sprite.scale = 1
-                self.group.add(obj.sprite)
-            elif obj.type == "power_dot":
-                print("Adding power dot.")
-                obj.sprite = remgine.Actor({"normal": PowerDotFrames}, "normal", (obj.x, obj.y))
-                obj.sprite.scale = 1
-                self.group.add(obj.sprite)
-            elif obj.name == "ghost":
-                obj.sprite = remgine.Actor({
-                        "walking": self.GoombaWalk,
-                        "killed": self.GoombaDie
-                    }, 
-                    "walking", 
-                    (obj.x, obj.y)
-                )
-                self.group.add(obj.sprite)
-
-            obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj)
-
-        return obj_grid
 
     def check_obj_collisions(self, tx, ty):
         objs = self.collectible_obj_grid.get(tx, ty)
@@ -121,39 +108,39 @@ class PlayState(remgine.GameState):
                         o.sprite.curr_state_key = "killed"
 
     def move_up(self, amount = -Speed):
-        return self.map.check_move_up(self.player, amount)
+        (moved, self.player.position) = self.map.check_move_up(self.player, amount)
 
         # Check object collisions
         # self.check_obj_collisions(tx_l, ty)
         # self.check_obj_collisions(midpoint(tx_l, tx_r), ty)
         # self.check_obj_collisions(tx_r, ty)
-        # return moved
+        return moved
         
     def move_down(self, amount = Speed):
-        return self.map.check_move_down(self.player, amount)
+        (moved, self.player.position) = self.map.check_move_down(self.player, amount)
         
         # Check object collisions
         # self.check_obj_collisions(tx_l, ty)
         # self.check_obj_collisions(midpoint(tx_l, tx_r), ty)
         # self.check_obj_collisions(tx_r, ty)
-        # return moved
+        return moved
 
     def move_left(self, amount = Speed):
-        return self.map.check_move_left(self.player, amount)
+        (moved, self.player.position) = self.map.check_move_left(self.player, amount)
         # Check object collisions
         # self.check_obj_collisions(tx, ty_t)
         # self.check_obj_collisions(tx, midpoint(ty_t, ty_b))
         # self.check_obj_collisions(tx, ty_b)
-        # return moved
+        return moved
 
     def move_right(self, amount = Speed):
-        return self.map.check_move_right(self.player, amount)
+        (moved, self.player.position) =  self.map.check_move_right(self.player, amount)
         
         # Check object collisions
         # self.check_obj_collisions(tx, ty_t)
         # self.check_obj_collisions(tx, midpoint(ty_t, ty_b))
         # self.check_obj_collisions(tx, ty_b)
-        # return moved
+        return moved
 
     def update(self):
         kb = self.context.keyboard
@@ -165,32 +152,28 @@ class PlayState(remgine.GameState):
             self.player.next_direction = Direction.Up
             
         if self.player.direction == Direction.Up or self.player.next_direction == Direction.Up:
-            (moved, self.player.position) = self.move_up()
-            if moved:
+            if self.move_up():
                 self.player.direction = Direction.Up
 
         if kb.down(K_DOWN):
             self.player.next_direction = Direction.Down
             
         if self.player.direction == Direction.Down or self.player.next_direction == Direction.Down:
-            (moved, self.player.position) = self.move_down()
-            if moved:
+            if self.move_down():
                 self.player.direction = Direction.Down
 
         if kb.down(K_LEFT):
             self.player.next_direction = Direction.Left
             
         if self.player.direction == Direction.Left or self.player.next_direction == Direction.Left:
-            (moved, self.player.position) = self.move_left()
-            if moved:
+            if self.move_left():
                 self.player.direction = Direction.Left
 
         if kb.down(K_RIGHT):
             self.player.next_direction = Direction.Right
             
         if self.player.direction == Direction.Right or self.player.next_direction == Direction.Right:
-            (moved, self.player.position) = self.move_right()
-            if moved:
+            if self.move_right():
                 self.player.direction = Direction.Right
 
         # Handle joystick input
