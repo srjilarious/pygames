@@ -14,6 +14,8 @@ class TileMap:
     """
     The tile map holds the map data as well as object grids for various items.
     """
+
+    #--------------------------------------------------------------------------
     def __init__(self, map_path, collision_layer_name, screen_width, screen_height):
         self.tmxdata = load_pygame(map_path)
 
@@ -36,7 +38,7 @@ class TileMap:
             )
         self.obj_grids = {}
 
-
+    #--------------------------------------------------------------------------
     def check_move_left(self, actor, amount):
         """
         Checks if the actor could move left in the tile map.
@@ -66,8 +68,21 @@ class TileMap:
         if not hit:
             move_pos = (actor.position[0]-amount, actor.position[1])
             moved = True
+
+            # If we moved, we can check the registered object grid(s) for
+            # hits 
+            for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
+                for ty in tys:
+                    objs = obj_grid.get(tx, ty)
+                    if len(objs) > 0:
+                        remaining = []
+                        for o in objs:
+                            if not hit_callback(obj_context, actor, o):
+                                remaining.append(o)
+                        obj_grid.set(tx, ty, remaining)
         return (moved, move_pos)
     
+    #--------------------------------------------------------------------------
     def check_move_right(self, actor, amount):
         """
         Checks if the actor could move left in the tile map.
@@ -98,9 +113,21 @@ class TileMap:
             move_pos = (actor.position[0]+amount, actor.position[1])
             moved = True
 
+            # If we moved, we can check the registered object grid(s) for
+            # hits 
+            for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
+                for ty in tys:
+                    objs = obj_grid.get(tx, ty)
+                    if len(objs) > 0:
+                        remaining = []
+                        for o in objs:
+                            if not hit_callback(obj_context, actor, o):
+                                remaining.append(o)
+                        obj_grid.set(tx, ty, remaining)
         return (moved, move_pos)
 
     
+    #--------------------------------------------------------------------------
     def check_move_up(self, actor, amount):
         """
         Checks if the actor could move left in the tile map.
@@ -108,7 +135,7 @@ class TileMap:
         """
         moved = False
         # self.player_y = max(self.player_radius, self.player_y - Speed)
-        new_rect = actor.collide_rect.move(0, amount)
+        new_rect = actor.collide_rect.move(0, -amount)
         new_rect.top -= 1
         ty = int(new_rect.top / self.tmxdata.tileheight)
         txs = range(
@@ -127,11 +154,24 @@ class TileMap:
         
         # If we didn't hit any tile, then we can move.
         if not hit:
-            move_pos = (actor.position[0], actor.position[1] +amount)
+            move_pos = (actor.position[0], actor.position[1]-amount)
             moved = True
             
+            # If we moved, we can check the registered object grid(s) for
+            # hits 
+            for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
+                for tx in txs:
+                    objs = obj_grid.get(tx, ty)
+                    if len(objs) > 0:
+                        remaining = []
+                        for o in objs:
+                            if not hit_callback(obj_context, actor, o):
+                                remaining.append(o)
+                        obj_grid.set(tx, ty, remaining)
+
         return (moved, move_pos)
     
+    #--------------------------------------------------------------------------
     def check_move_down(self, actor, amount):
         """
         Checks if the actor could move left in the tile map.
@@ -159,9 +199,22 @@ class TileMap:
         if not hit:
             move_pos = (actor.position[0], actor.position[1] +amount)
             moved = True
+
+            # If we moved, we can check the registered object grid(s) for
+            # hits 
+            for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
+                for tx in txs:
+                    objs = obj_grid.get(tx, ty)
+                    if len(objs) > 0:
+                        remaining = []
+                        for o in objs:
+                            if not hit_callback(obj_context, actor, o):
+                                remaining.append(o)
+                        obj_grid.set(tx, ty, remaining)
             
         return (moved, move_pos)
 
+    #--------------------------------------------------------------------------
     def check_collide_tile(self, player_rect, x, y):
         tile = self.get_main_tile(x, y)
 
@@ -184,14 +237,18 @@ class TileMap:
         else:
             return False
 
+    #--------------------------------------------------------------------------
     def get_main_tile(self, x, y):
         return self.main_tiles.data[int(y)][int(x)]
 
-    def create_obj_grid(self, layer_name, callback):
+    #--------------------------------------------------------------------------
+    def create_obj_grid(self, layer_name, create_callback, hit_callback, obj_context):
         """
         Creates an object grid for tile aligned objects from a layer.
         layer_name: The layer from the tile map to iterate over
-        callback: A function that handles creating a sprite type object given the object reference.
+        create_callback: A function that handles creating a sprite type object given the object reference.
+        hit_callback: A callback to call when checking actor movement within map. Callback receives (context, actor, object) and should return true if object should be removed from grid,
+        obj_context: the context to be passed to the hit callback.
         """
         obj_grid = ObjectGrid(
                 self.tmxdata.width, 
@@ -203,10 +260,10 @@ class TileMap:
 
         for obj in obj_group:
             # print(f"Inserting object {obj.type} at {obj.x}, {obj.y} with name '{obj.name}', from {layer_name}")
-            sprite = callback(obj)
+            sprite = create_callback(obj)
             if sprite is not None:
                 obj.sprite = sprite
                 self.group.add(obj.sprite)
             obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj)
-        self.obj_grids[layer_name] = obj_grid
+        self.obj_grids[layer_name] = (obj_grid, obj_context, hit_callback)
         return obj_grid

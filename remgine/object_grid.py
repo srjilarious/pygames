@@ -11,6 +11,10 @@ class ObjectGrid:
         """Returns any objects registered at the tile col/row"""
         return self._arr[tile_row][tile_col]
     
+    def set(self, tile_col, tile_row, l):
+        """Sets the objects at the tile col/row to be the given list"""
+        self._arr[tile_row][tile_col] = l
+
     def remove(self, obj, tile_col, tile_row):
         """Removes an object registered at the tile col/row"""
         l = self._arr[tile_row][tile_col]

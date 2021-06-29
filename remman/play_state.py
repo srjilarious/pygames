@@ -65,23 +65,21 @@ class PlayState(remgine.GameState):
                 ScreenWidth, 
                 ScreenHeight)
 
-        # self.tmxdata = load_pygame("assets/level1.tmx")
-
         # level_script = self.tmxdata.properties.get("start_script")
         # if level_script is not None:
         #     print("Got a level script from the level: " + level_script)
         #     level_module = importlib.import_module(level_script)
         #     level_module.start()
 
-        # self.map_data = pyscroll.TiledMapData(self.tmxdata)
-        # self.main_tiles = self.tmxdata.get_layer_by_name("main_layer")
-        
-        # self.map_layer = pyscroll.BufferedRenderer(self.map_data, (ScreenWidth, ScreenHeight), clamp_camera=False)
-        # self.group = pyscroll.PyscrollGroup(map_layer=self.map_layer)
         self.map.group.add(self.player)
 
         # Create an object grid and register our map objects into it.
-        self.collectible_obj_grid = self.map.create_obj_grid("dots", game_obj_create_cb)
+        self.collectible_obj_grid = self.map.create_obj_grid(
+                "dots", 
+                game_obj_create_cb,
+                PlayState.handle_obj_collide,
+                self
+            )
 
         # if pygame.joystick.get_count() > 0:
         #     self.joystick = joystick = pygame.joystick.Joystick(0)
@@ -90,24 +88,22 @@ class PlayState(remgine.GameState):
         #     self.joystick = None
         self.debug_rects = []
 
-    def check_obj_collisions(self, tx, ty):
-        objs = self.collectible_obj_grid.get(tx, ty)
-        if len(objs) > 0:
-            for o in objs:
-                print(f"Hit object: '{o.type}'")
-                if o.type == "dot" and o.sprite in self.group:
-                    self.score += 100
-                    self.group.remove(o.sprite)
-                    objs.remove(o)
-                if o.type == "power_dot" and o.sprite in self.group:
-                    self.score += 500
-                    self.group.remove(o.sprite)
-                    objs.remove(o)
-                if o.name == "ghost" and o.sprite in self.group:
-                    if o.sprite.curr_state_key != "killed":
-                        o.sprite.curr_state_key = "killed"
+    def handle_obj_collide(self, _actor, o):
+        print(f"Hit object: '{o.type}'")
+        if o.type == "dot" and o.sprite in self.map.group:
+            self.score += 100
+            self.map.group.remove(o.sprite)
+            return True
+        if o.type == "power_dot" and o.sprite in self.map.group:
+            self.score += 500
+            self.map.group.remove(o.sprite)
+            return True
+        if o.name == "ghost" and o.sprite in self.map.group:
+            if o.sprite.curr_state_key != "killed":
+                o.sprite.curr_state_key = "killed"            
+        return False
 
-    def move_up(self, amount = -Speed):
+    def move_up(self, amount = Speed):
         (moved, self.player.position) = self.map.check_move_up(self.player, amount)
 
         # Check object collisions
