@@ -3,6 +3,7 @@ A class using pytile and pyscroll to load/render tileed maps adding on
 common actor movemnt/collision checks against map data.
 """
 
+import itertools
 import pygame as pg
 import pytmx
 from pytmx.util_pygame import load_pygame
@@ -49,15 +50,16 @@ class TileMap:
         new_rect = actor.collide_rect.move(-amount, 0)
         new_rect.left -= 1
 
-        tx = int(new_rect.left / self.tmxdata.tilewidth)
         tys = range(
             int(new_rect.top / self.tmxdata.tileheight),
             int((new_rect.bottom + self.tmxdata.tileheight+1) / self.tmxdata.tileheight)
             )
-        
+        txs = itertools.repeat(int(new_rect.left / self.tmxdata.tilewidth), len(tys))
+        points = list(zip(txs, tys))
+
         # Check for tile collisions along line of interest
         hit = False
-        for ty in tys:
+        for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
                 move_pos = ((tx+1)*self.tmxdata.tileheight, actor.position[1])
                 hit = True
@@ -72,7 +74,7 @@ class TileMap:
             # If we moved, we can check the registered object grid(s) for
             # hits 
             for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
-                for ty in tys:
+                for (tx, ty) in points:
                     objs = obj_grid.get(tx, ty)
                     if len(objs) > 0:
                         remaining = []
@@ -93,15 +95,16 @@ class TileMap:
         new_rect = actor.collide_rect.move(amount, 0)
         new_rect.right += 1
 
-        tx = int(new_rect.right / self.tmxdata.tilewidth)
         tys = range(
             int(new_rect.top / self.tmxdata.tileheight),
             int((new_rect.bottom + self.tmxdata.tileheight+1) / self.tmxdata.tileheight)
             )
-        
+        txs = itertools.repeat(int(new_rect.right / self.tmxdata.tilewidth), len(tys))
+        points = list(zip(txs, tys))
+
         # Check for tile collisions along line of interest
         hit = False
-        for ty in tys:
+        for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
                 move_pos = ((tx)*self.tmxdata.tileheight - actor.collide_rect[2], actor.position[1])
                 hit = True
@@ -116,7 +119,7 @@ class TileMap:
             # If we moved, we can check the registered object grid(s) for
             # hits 
             for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
-                for ty in tys:
+                for (tx, ty) in points:
                     objs = obj_grid.get(tx, ty)
                     if len(objs) > 0:
                         remaining = []
@@ -137,15 +140,16 @@ class TileMap:
         # self.player_y = max(self.player_radius, self.player_y - Speed)
         new_rect = actor.collide_rect.move(0, -amount)
         new_rect.top -= 1
-        ty = int(new_rect.top / self.tmxdata.tileheight)
         txs = range(
             int(new_rect.left / self.tmxdata.tilewidth),
             int((new_rect.right + self.tmxdata.tilewidth+1) / self.tmxdata.tilewidth)
             )
-        
+        tys = itertools.repeat(int(new_rect.top / self.tmxdata.tileheight), len(txs))
+        points = list(zip(txs, tys))
+
         # Check for tile collisions along line of interest
         hit = False
-        for tx in txs:
+        for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
                 move_pos = (actor.position[0], (ty+1)*self.tmxdata.tileheight)
                 hit = True
@@ -160,7 +164,7 @@ class TileMap:
             # If we moved, we can check the registered object grid(s) for
             # hits 
             for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
-                for tx in txs:
+                for (tx, ty) in points:
                     objs = obj_grid.get(tx, ty)
                     if len(objs) > 0:
                         remaining = []
@@ -180,15 +184,15 @@ class TileMap:
         moved = False
         new_rect = actor.collide_rect.move(0, amount)
         new_rect.bottom += 1
-        ty = int(new_rect.bottom / self.tmxdata.tileheight)
         txs = range(
             int(new_rect.left / self.tmxdata.tilewidth),
             int((new_rect.right + self.tmxdata.tilewidth+1) / self.tmxdata.tilewidth)
             )
-        
+        tys = itertools.repeat(int(new_rect.bottom / self.tmxdata.tileheight), len(txs))
+        points = list(zip(txs, tys))
         # Check for tile collisions along line of interest
         hit = False
-        for tx in txs:
+        for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
                 move_pos = (actor.position[0], (ty)*self.tmxdata.tileheight -actor.collide_rect[3])
                 hit = True
@@ -203,7 +207,7 @@ class TileMap:
             # If we moved, we can check the registered object grid(s) for
             # hits 
             for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
-                for tx in txs:
+                for (tx, ty) in points:
                     objs = obj_grid.get(tx, ty)
                     if len(objs) > 0:
                         remaining = []
@@ -242,11 +246,11 @@ class TileMap:
         return self.main_tiles.data[int(y)][int(x)]
 
     #--------------------------------------------------------------------------
-    def create_obj_grid(self, layer_name, create_callback, hit_callback, obj_context):
+    def create_obj_grid(self, layer_name, create_callback, hit_callback, context):
         """
         Creates an object grid for tile aligned objects from a layer.
         layer_name: The layer from the tile map to iterate over
-        create_callback: A function that handles creating a sprite type object given the object reference.
+        create_callback: A function that handles creating a sprite type object given the context, and the object reference.
         hit_callback: A callback to call when checking actor movement within map. Callback receives (context, actor, object) and should return true if object should be removed from grid,
         obj_context: the context to be passed to the hit callback.
         """
@@ -260,10 +264,10 @@ class TileMap:
 
         for obj in obj_group:
             # print(f"Inserting object {obj.type} at {obj.x}, {obj.y} with name '{obj.name}', from {layer_name}")
-            sprite = create_callback(obj)
+            sprite = create_callback(context, obj)
             if sprite is not None:
                 obj.sprite = sprite
                 self.group.add(obj.sprite)
             obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj)
-        self.obj_grids[layer_name] = (obj_grid, obj_context, hit_callback)
+        self.obj_grids[layer_name] = (obj_grid, context, hit_callback)
         return obj_grid

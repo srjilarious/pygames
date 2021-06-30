@@ -21,7 +21,7 @@ import remgine
 def midpoint(a, b):
         return int(a + (b-a)/2)
 
-def game_obj_create_cb(obj):
+def game_obj_create_cb(_context, obj):
     if obj.type == "dot":
         print("Adding dot.")
         sprite = remgine.Actor({"normal": DotFrames}, "normal", (obj.x, obj.y))
@@ -103,41 +103,6 @@ class PlayState(remgine.GameState):
                 o.sprite.curr_state_key = "killed"            
         return False
 
-    def move_up(self, amount = Speed):
-        (moved, self.player.position) = self.map.check_move_up(self.player, amount)
-
-        # Check object collisions
-        # self.check_obj_collisions(tx_l, ty)
-        # self.check_obj_collisions(midpoint(tx_l, tx_r), ty)
-        # self.check_obj_collisions(tx_r, ty)
-        return moved
-        
-    def move_down(self, amount = Speed):
-        (moved, self.player.position) = self.map.check_move_down(self.player, amount)
-        
-        # Check object collisions
-        # self.check_obj_collisions(tx_l, ty)
-        # self.check_obj_collisions(midpoint(tx_l, tx_r), ty)
-        # self.check_obj_collisions(tx_r, ty)
-        return moved
-
-    def move_left(self, amount = Speed):
-        (moved, self.player.position) = self.map.check_move_left(self.player, amount)
-        # Check object collisions
-        # self.check_obj_collisions(tx, ty_t)
-        # self.check_obj_collisions(tx, midpoint(ty_t, ty_b))
-        # self.check_obj_collisions(tx, ty_b)
-        return moved
-
-    def move_right(self, amount = Speed):
-        (moved, self.player.position) =  self.map.check_move_right(self.player, amount)
-        
-        # Check object collisions
-        # self.check_obj_collisions(tx, ty_t)
-        # self.check_obj_collisions(tx, midpoint(ty_t, ty_b))
-        # self.check_obj_collisions(tx, ty_b)
-        return moved
-
     def update(self):
         kb = self.context.keyboard
 
@@ -148,28 +113,32 @@ class PlayState(remgine.GameState):
             self.player.next_direction = Direction.Up
             
         if self.player.direction == Direction.Up or self.player.next_direction == Direction.Up:
-            if self.move_up():
+            (moved, self.player.position) = self.map.check_move_up(self.player, Speed)
+            if moved:
                 self.player.direction = Direction.Up
 
         if kb.down(K_DOWN):
             self.player.next_direction = Direction.Down
             
         if self.player.direction == Direction.Down or self.player.next_direction == Direction.Down:
-            if self.move_down():
+            (moved, self.player.position) = self.map.check_move_down(self.player, Speed)
+            if moved:
                 self.player.direction = Direction.Down
 
         if kb.down(K_LEFT):
             self.player.next_direction = Direction.Left
             
         if self.player.direction == Direction.Left or self.player.next_direction == Direction.Left:
-            if self.move_left():
+            (moved, self.player.position) = self.map.check_move_left(self.player, Speed)
+            if moved:
                 self.player.direction = Direction.Left
 
         if kb.down(K_RIGHT):
             self.player.next_direction = Direction.Right
             
         if self.player.direction == Direction.Right or self.player.next_direction == Direction.Right:
-            if self.move_right():
+            (moved, self.player.position) = self.map.check_move_right(self.player, Speed)
+            if moved:
                 self.player.direction = Direction.Right
 
         # Handle joystick input
