@@ -184,21 +184,10 @@ class PlayState(remgine.GameState):
     
 
     def render(self):
-        # Fill the background with white
-        # self.off_screen.fill((0,0,0))
-
-
         # self.group.center((self.player.rect.x, self.player.rect.y))
         #self.group.center((ScreenWidth/2, ScreenHeight/2))
         
         self.map.group.draw(self.context.off_screen)
-        
-        # Draw a solid blue circle in the center
-        # pygame.draw.circle(self.off_screen, (0, 0, 255), (self.player_x, self.player_y), self.player_radius)
-        # p_screen_pos = pygame.Rect(ScreenWidth/2, ScreenHeight/2, PlayerWidth, PlayerHeight)
-        # pygame.draw.rect(self.off_screen, (0,0,255), p_screen_pos)
-
-        #pygame.draw.rect(self.off_screen, (0,0,255), self.player.rect)
 
         map_offset = (0,0)#(self.player.rect.x-ScreenWidth/2, self.player.rect.y-ScreenHeight/2)
         for r in self.debug_rects:
@@ -206,7 +195,3 @@ class PlayState(remgine.GameState):
 
         # txt = self.font.render("Score: " + str(self.score), False, pygame.Color('white'))
         # self.off_screen.blit(txt, (5, 5))
-
-        # self.screen.blit(pg.transform.scale(self.off_screen, self.screen.get_rect().size), (0, 0))
-        # Flip the display
-        # pygame.display.flip()
