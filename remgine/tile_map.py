@@ -71,17 +71,9 @@ class TileMap:
             move_pos = (actor.position[0]-amount, actor.position[1])
             moved = True
 
-            # If we moved, we can check the registered object grid(s) for
-            # hits 
-            for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
-                for (tx, ty) in points:
-                    objs = obj_grid.get(tx, ty)
-                    if len(objs) > 0:
-                        remaining = []
-                        for o in objs:
-                            if not hit_callback(obj_context, actor, o):
-                                remaining.append(o)
-                        obj_grid.set(tx, ty, remaining)
+            # If we moved, check the registered object grid(s) for hits 
+            self.check_obj_grid_collisions(actor, points)
+            
         return (moved, move_pos)
     
     #--------------------------------------------------------------------------
@@ -116,17 +108,9 @@ class TileMap:
             move_pos = (actor.position[0]+amount, actor.position[1])
             moved = True
 
-            # If we moved, we can check the registered object grid(s) for
-            # hits 
-            for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
-                for (tx, ty) in points:
-                    objs = obj_grid.get(tx, ty)
-                    if len(objs) > 0:
-                        remaining = []
-                        for o in objs:
-                            if not hit_callback(obj_context, actor, o):
-                                remaining.append(o)
-                        obj_grid.set(tx, ty, remaining)
+            # If we moved, check the registered object grid(s) for hits 
+            self.check_obj_grid_collisions(actor, points)
+
         return (moved, move_pos)
 
     
@@ -161,17 +145,8 @@ class TileMap:
             move_pos = (actor.position[0], actor.position[1]-amount)
             moved = True
             
-            # If we moved, we can check the registered object grid(s) for
-            # hits 
-            for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
-                for (tx, ty) in points:
-                    objs = obj_grid.get(tx, ty)
-                    if len(objs) > 0:
-                        remaining = []
-                        for o in objs:
-                            if not hit_callback(obj_context, actor, o):
-                                remaining.append(o)
-                        obj_grid.set(tx, ty, remaining)
+            # If we moved, check the registered object grid(s) for hits 
+            self.check_obj_grid_collisions(actor, points)
 
         return (moved, move_pos)
     
@@ -204,19 +179,21 @@ class TileMap:
             move_pos = (actor.position[0], actor.position[1] +amount)
             moved = True
 
-            # If we moved, we can check the registered object grid(s) for
-            # hits 
-            for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
-                for (tx, ty) in points:
-                    objs = obj_grid.get(tx, ty)
-                    if len(objs) > 0:
-                        remaining = []
-                        for o in objs:
-                            if not hit_callback(obj_context, actor, o):
-                                remaining.append(o)
-                        obj_grid.set(tx, ty, remaining)
+            # If we moved, check the registered object grid(s) for hits 
+            self.check_obj_grid_collisions(actor, points)
             
         return (moved, move_pos)
+
+    def check_obj_grid_collisions(self, actor, points):
+        for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
+            for (tx, ty) in points:
+                objs = obj_grid.get(tx, ty)
+                if len(objs) > 0:
+                    remaining = []
+                    for o in objs:
+                        if not hit_callback(obj_context, actor, o):
+                            remaining.append(o)
+                    obj_grid.set(tx, ty, remaining)
 
     #--------------------------------------------------------------------------
     def check_collide_tile(self, player_rect, x, y):
