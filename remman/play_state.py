@@ -25,17 +25,18 @@ def game_obj_create_cb(_context, obj):
     if obj.type == "dot":
         print("Adding dot.")
         sprite = remgine.Actor({"normal": DotFrames}, "normal", (obj.x, obj.y))
-        sprite.scale = 1
+        
     elif obj.type == "power_dot":
         print("Adding power dot.")
         sprite = remgine.Actor({"normal": PowerDotFrames}, "normal", (obj.x, obj.y))
-        sprite.scale = 1
-    elif obj.name == "ghost":
+        
+    elif obj.type == "ghost":
         sprite = remgine.Actor({
-                "walking": self.GoombaWalk,
-                "killed": self.GoombaDie
+                "right": RedGhostRightFrames,
+                "up": RedGhostUpFrames,
+                "down": RedGhostDownFrames
             }, 
-            "walking", 
+            "right", 
             (obj.x, obj.y)
         )
     return sprite

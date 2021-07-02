@@ -78,8 +78,8 @@ class Actor(pygame.sprite.Sprite):
 
     @property
     def rect(self):
-        if self.scale is not None:
-            return pygame.Rect(self.draw_position, (int(self.curr_frame.rect[2]*self.scale), int(self.curr_frame.rect[3]*self.scale)))
+        if self.render_scale is not None:
+            return pygame.Rect(self.draw_position, (int(self.curr_frame.rect[2]*self.render_scale), int(self.curr_frame.rect[3]*self.render_scale)))
         else:
             return pygame.Rect(self.draw_position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
 
