@@ -40,6 +40,71 @@ def game_obj_create_cb(_context, obj):
         )
     return sprite
 
+class Player(remgine.Actor):
+    def __init__(self):
+        remgine.Actor.__init__(self, {
+            "right": MsPacManFrames
+        }, "right")
+        self.collide_adjust = (0, 0, 8, 8)
+        self.scale = 0.8
+        self.gravity = (8, 12)
+        self.direction = Direction.Stopped
+        self.next_direction = Direction.Stopped
+        self.position = (8, 8)
+
+    def update(self, time_elapsed_ms, context):
+        kb = context.context.keyboard
+
+        if kb.down(K_UP):
+            self.next_direction = Direction.Up
+            
+        if self.direction == Direction.Up or self.next_direction == Direction.Up:
+            (moved, self.position) = context.map.check_move_up(self, Speed)
+            if moved:
+                self.direction = Direction.Up
+
+        if kb.down(K_DOWN):
+            self.next_direction = Direction.Down
+            
+        if self.direction == Direction.Down or self.next_direction == Direction.Down:
+            (moved, self.position) = context.map.check_move_down(self, Speed)
+            if moved:
+                self.direction = Direction.Down
+
+        if kb.down(K_LEFT):
+            self.next_direction = Direction.Left
+            
+        if self.direction == Direction.Left or self.next_direction == Direction.Left:
+            (moved, self.position) = context.map.check_move_left(self, Speed)
+            if moved:
+                self.direction = Direction.Left
+
+        if kb.down(K_RIGHT):
+            self.next_direction = Direction.Right
+            
+        if self.direction == Direction.Right or self.next_direction == Direction.Right:
+            (moved, self.position) = context.map.check_move_right(self, Speed)
+            if moved:
+                self.direction = Direction.Right
+
+        # Handle joystick input
+        # if self.joystick is not None:
+        #     jx, jy = self.joystick.get_hat(0)
+        #     if jy > 0:
+        #         moved = True
+        #         self.move_up()
+        #     if jy < 0:
+        #         moved = True
+        #         self.move_down()
+        #     if jx < 0:
+        #         moved = True
+        #         self.move_left()
+        #     if jx > 0:
+        #         moved = True
+        #         self.move_right()
+        
+        remgine.Actor.update(self, time_elapsed_ms, context)
+
 class PlayState(remgine.GameState):
     def __init__(self, context):
         remgine.GameState.__init__(self, context)
@@ -48,16 +113,7 @@ class PlayState(remgine.GameState):
         self.running = True
         self.score = 0
         
-        self.player = remgine.Actor({
-            "right": MsPacManFrames
-        }, "right")
-
-        self.player.collide_adjust = (0, 0, 8, 8)
-        self.player.scale = 0.8
-        self.player.gravity = (8, 12)
-        self.player.direction = Direction.Stopped
-        self.player.next_direction = Direction.Stopped
-        self.player.position = (8, 8)
+        self.player = Player()
 
         self.map = remgine.TileMap(
                 "assets/level1.tmx", 
@@ -108,54 +164,6 @@ class PlayState(remgine.GameState):
 
         if kb.any_down([K_UP, K_DOWN, K_LEFT, K_RIGHT]):
             self.debug_rects.clear()
-
-        if kb.down(K_UP):
-            self.player.next_direction = Direction.Up
-            
-        if self.player.direction == Direction.Up or self.player.next_direction == Direction.Up:
-            (moved, self.player.position) = self.map.check_move_up(self.player, Speed)
-            if moved:
-                self.player.direction = Direction.Up
-
-        if kb.down(K_DOWN):
-            self.player.next_direction = Direction.Down
-            
-        if self.player.direction == Direction.Down or self.player.next_direction == Direction.Down:
-            (moved, self.player.position) = self.map.check_move_down(self.player, Speed)
-            if moved:
-                self.player.direction = Direction.Down
-
-        if kb.down(K_LEFT):
-            self.player.next_direction = Direction.Left
-            
-        if self.player.direction == Direction.Left or self.player.next_direction == Direction.Left:
-            (moved, self.player.position) = self.map.check_move_left(self.player, Speed)
-            if moved:
-                self.player.direction = Direction.Left
-
-        if kb.down(K_RIGHT):
-            self.player.next_direction = Direction.Right
-            
-        if self.player.direction == Direction.Right or self.player.next_direction == Direction.Right:
-            (moved, self.player.position) = self.map.check_move_right(self.player, Speed)
-            if moved:
-                self.player.direction = Direction.Right
-
-        # Handle joystick input
-        # if self.joystick is not None:
-        #     jx, jy = self.joystick.get_hat(0)
-        #     if jy > 0:
-        #         moved = True
-        #         self.move_up()
-        #     if jy < 0:
-        #         moved = True
-        #         self.move_down()
-        #     if jx < 0:
-        #         moved = True
-        #         self.move_left()
-        #     if jx > 0:
-        #         moved = True
-        #         self.move_right()
 
         # if moved:
         #     self.player.curr_state_key = "walking"
