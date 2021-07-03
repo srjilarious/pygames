@@ -6,7 +6,6 @@ import logging
 from remman.constants import Direction, ScreenWidth
 import sys
 
-
 import pygame as pg
 from pygame.locals import *
 
