@@ -30,12 +30,7 @@ def game_obj_create_cb(_context, obj):
         sprite = remgine.Actor({"normal": PowerDotFrames}, "normal", (obj.x, obj.y))
         
     elif obj.type == "ghost":
-        sprite = remgine.Actor({
-                "right": RedGhostRightFrames,
-                "up": RedGhostUpFrames,
-                "down": RedGhostDownFrames
-            }, 
-            "right", 
+        sprite = RedGhost( 
             (obj.x, obj.y)
         )
     return sprite
@@ -105,6 +100,38 @@ class Player(remgine.Actor):
         
         remgine.Actor.update(self, time_elapsed_ms, context)
 
+
+DirCheckTime = 2000
+class RedGhost(remgine.Actor):
+    def __init__(self, position=(0,0)):
+        remgine.Actor.__init__(self, {
+                "right": RedGhostRightFrames,
+                "up": RedGhostUpFrames,
+                "down": RedGhostDownFrames
+            }, 
+            "right", 
+            position
+        )
+        self.collide_adjust = (0, 0, 8, 8)
+        self.dir_check_time = 0
+        self.direction = Direction.Stopped
+
+    def update(self, time_elapsed_ms, context):
+        remgine.Actor.update(self, time_elapsed_ms, context)
+        self.dir_check_time -= time_elapsed_ms
+        if self.dir_check_time < 0:
+            self.dir_check_time = DirCheckTime
+            self.direction = random.choice([Direction.Up, Direction.Down, Direction.Left, Direction.Right])
+        else:
+            if self.direction == Direction.Up:
+                (_moved, self.position) = context.map.check_move_up(self, Speed)
+            elif self.direction == Direction.Down:
+                (_moved, self.position) = context.map.check_move_down(self, Speed)
+            elif self.direction == Direction.Left:
+                (_moved, self.position) = context.map.check_move_left(self, Speed)
+            elif self.direction == Direction.Right:
+                (_moved, self.position) = context.map.check_move_right(self, Speed)
+
 class PlayState(remgine.GameState):
     def __init__(self, context):
         remgine.GameState.__init__(self, context)
@@ -160,6 +187,7 @@ class PlayState(remgine.GameState):
         return False
 
     def update(self):
+        
         kb = self.context.keyboard
 
         if kb.any_down([K_UP, K_DOWN, K_LEFT, K_RIGHT]):
