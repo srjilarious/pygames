@@ -20,6 +20,9 @@ import remgine
 def midpoint(a, b):
         return int(a + (b-a)/2)
 
+def intersection_obj_create_cb(_context, obj):
+    pass
+
 def game_obj_create_cb(_context, obj):
     if obj.type == "dot":
         print("Adding dot.")
@@ -46,6 +49,7 @@ class Player(remgine.Actor):
         self.direction = Direction.Stopped
         self.next_direction = Direction.Stopped
         self.position = (8, 8)
+        self.game_type = "player"
 
     def update(self, time_elapsed_ms, context):
         kb = context.context.keyboard
@@ -115,6 +119,7 @@ class RedGhost(remgine.Actor):
         self.collide_adjust = (0, 0, 8, 8)
         self.dir_check_time = 0
         self.direction = Direction.Stopped
+        self.game_type = "enemy"
 
     def update(self, time_elapsed_ms, context):
         remgine.Actor.update(self, time_elapsed_ms, context)
@@ -163,6 +168,14 @@ class PlayState(remgine.GameState):
                 PlayState.handle_obj_collide,
                 self
             )
+        
+        # Create an intersection object grid.
+        # self.collectible_obj_grid = self.map.create_obj_grid(
+        #         "intersections", 
+        #         game_obj_create_cb,
+        #         PlayState.handle_obj_collide,
+        #         self
+        #     )
 
         # if pygame.joystick.get_count() > 0:
         #     self.joystick = joystick = pygame.joystick.Joystick(0)
@@ -170,6 +183,9 @@ class PlayState(remgine.GameState):
         # else:
         #     self.joystick = None
         self.debug_rects = []
+
+    def intersection_obj_collide(self, _actor, o):
+        pass
 
     def handle_obj_collide(self, _actor, o):
         print(f"Hit object: '{o.type}'")

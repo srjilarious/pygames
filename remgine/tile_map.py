@@ -38,6 +38,21 @@ class TileMap:
                 map_layer=buffered_renderer
             )
         self.obj_grids = {}
+        self.type_to_obj_layers = {}
+        self.type_to_obj_grids = {}
+
+        # Look for an interactions property on the map.  We expect a set of 
+        # lines with 'layer:game_type' to add to our list.
+        interaction_property = self.tmxdata.properties["interaction"]
+        print(f"Got property: {interaction_property}")
+        for line in interaction_property.splitlines():
+            split = line.split(':')
+            layer = split[0]
+            obj_type = split[1]
+            print(f"Adding layer {layer} for object type {obj_type}")
+            layer_list = self.type_to_obj_layers.get(layer, [])
+            layer_list.append(obj_type)
+            self.type_to_obj_layers[layer] = layer_list
 
     #--------------------------------------------------------------------------
     def check_move_left(self, actor, amount):
@@ -185,7 +200,11 @@ class TileMap:
         return (moved, move_pos)
 
     def check_obj_grid_collisions(self, actor, points):
-        for (obj_grid, obj_context, hit_callback) in self.obj_grids.values():
+        if actor.game_type is None:
+            return
+
+        grids = self.type_to_obj_grids.get(actor.game_type, [])
+        for (obj_grid, obj_context, hit_callback) in grids:
             for (tx, ty) in points:
                 objs = obj_grid.get(tx, ty)
                 if len(objs) > 0:
@@ -238,6 +257,10 @@ class TileMap:
                 self.tmxdata.tileheight
             )
         obj_group = self.tmxdata.get_layer_by_name(layer_name)
+        for obj in self.type_to_obj_layers[layer_name]:
+            obj_grid_list = self.type_to_obj_grids.get(obj, [])
+            obj_grid_list.append((obj_grid, context, hit_callback))
+            self.type_to_obj_grids[obj] = obj_grid_list
 
         for obj in obj_group:
             # print(f"Inserting object {obj.type} at {obj.x}, {obj.y} with name '{obj.name}', from {layer_name}")
