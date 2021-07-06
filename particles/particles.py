@@ -19,14 +19,15 @@ NumParticlesPerExplosion = 100
 class Particle(pg.sprite.Sprite):
     def __init__(self, position=(ScreenWidth/2,ScreenHeight/2)):
         pg.sprite.Sprite.__init__(self)
-        self.speed = (random.random()*10-5, random.random()*10-5)
+        self.speed = (random.random()*5-2.5, random.random()*5-2.5)
         self.time_left_ms = random.randint(500, 2000)
-        self.color = (random.randint(10, 255), random.randint(10, 255), random.randint(10, 255), 255)
+        self.color = (random.randint(10, 255), random.randint(10, 255), random.randint(100, 160), 255)
         self.position = position
 
     def update(self, time_elapsed):
         self.position = (self.position[0] + self.speed[0], self.position[1] + self.speed[1])
         self.time_left_ms -= time_elapsed
+        self.color = (self.color[0], self.color[1], self.color[2], min(255, self.time_left_ms/20))
         return self.time_left_ms > 0
 
     def render(self, surface):
@@ -34,10 +35,10 @@ class Particle(pg.sprite.Sprite):
 
 
 class Explosion:
-    def __init__(self, numParticles=NumParticlesPerExplosion):
+    def __init__(self, position, numParticles=NumParticlesPerExplosion):
         self.particles = []
         for i in range(numParticles):
-            self.particles.append(Particle())
+            self.particles.append(Particle(position))
 
     def update(self, time_elapsed_ms):
         parts = []
@@ -63,8 +64,8 @@ class MainState(remgine.GameState):
 
     def update(self):
         kb = self.context.keyboard
-        if kb.pressed(K_SPACE):
-            self.explosions.append(Explosion())
+        if kb.down(K_SPACE):
+            self.explosions.append(Explosion(position=(random.randint(20, ScreenWidth-20), random.randint(20, ScreenHeight-20))))
 
         if kb.down(K_ESCAPE):
             self.running = False
