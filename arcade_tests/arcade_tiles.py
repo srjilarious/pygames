@@ -10,10 +10,12 @@ python -m arcade.examples.starting_template
 import arcade
 import random
 
+from pyglet.gl import *
+
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Starting Template"
-NumParticles = 250
+NumParticles = 10
 
 class MyGame(arcade.Window):
     """
@@ -25,22 +27,43 @@ class MyGame(arcade.Window):
     """
 
     def __init__(self, width, height, title):
-        super().__init__(width, height, title)
-
+        super().__init__(width, height, title, antialiasing=False)
+        
         arcade.set_background_color(arcade.color.AIR_FORCE_BLUE)
-        self.ball_list = None
+        self.wall_list = None
+        self.dot_list = None
+        
+        
         
 
     def setup(self):
         """ Set up the game variables. Call to re-start the game. """
+
         self.ball_list = arcade.SpriteList()
+        # Name of map file to load
+        map_name = "../remman/assets/level1.tmx"
+        # Name of the layer in the file that has our platforms/walls
+        platforms_layer_name = 'main_layer'
+        # Name of the layer that has items for pick-up
+        dots_layer_name = 'dots'
+
+        # Read in the tiled map
+        my_map = arcade.tilemap.read_tmx(map_name)
+
+        # -- Platforms
+        self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
+                                                      layer_name=platforms_layer_name,
+                                                      scaling=4,
+                                                      use_spatial_hash=True)
+
+        self.dot_list = arcade.tilemap.process_layer(my_map, dots_layer_name, 4)
 
         for i in range(NumParticles):
             ball = arcade.Sprite("../assets/blue_piece.png", 1)
             ball.center_x = random.randrange(SCREEN_WIDTH)
             ball.center_y = random.randrange(SCREEN_HEIGHT)
-            ball.vel_x = random.randrange(-100, 100)
-            ball.vel_y = random.randrange(-100, 100)
+            ball.vel_x = random.randrange(-500, 500)
+            ball.vel_y = random.randrange(-500, 500)
             self.ball_list.append(ball)
 
     def on_draw(self):
@@ -51,7 +74,11 @@ class MyGame(arcade.Window):
         # This command should happen before we start drawing. It will clear
         # the screen to the background color, and erase what we drew last frame.
         arcade.start_render()
-        
+        # glEnable(GL_TEXTURE_2D)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+
+        self.wall_list.draw()
+        self.dot_list.draw()
         self.ball_list.draw()
         # Call draw() on all your sprite lists below
 
