@@ -12,10 +12,12 @@ import random
 
 from pyglet.gl import *
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+SCREEN_WIDTH = 200
+SCREEN_HEIGHT = 150
 SCREEN_TITLE = "Starting Template"
-NumParticles = 10
+NumParticles = 5
 
 class MyGame(arcade.Window):
     """
@@ -53,17 +55,16 @@ class MyGame(arcade.Window):
         # -- Platforms
         self.wall_list = arcade.tilemap.process_layer(map_object=my_map,
                                                       layer_name=platforms_layer_name,
-                                                      scaling=4,
                                                       use_spatial_hash=True)
 
-        self.dot_list = arcade.tilemap.process_layer(my_map, dots_layer_name, 4)
+        self.dot_list = arcade.tilemap.process_layer(my_map, dots_layer_name)
 
         for i in range(NumParticles):
-            ball = arcade.Sprite("../assets/blue_piece.png", 1)
+            ball = arcade.Sprite("../assets/blue_ghost.png", 1)
             ball.center_x = random.randrange(SCREEN_WIDTH)
             ball.center_y = random.randrange(SCREEN_HEIGHT)
-            ball.vel_x = random.randrange(-500, 500)
-            ball.vel_y = random.randrange(-500, 500)
+            ball.vel_x = random.randrange(-50, 50)
+            ball.vel_y = random.randrange(-50, 50)
             self.ball_list.append(ball)
 
     def on_draw(self):
@@ -74,12 +75,18 @@ class MyGame(arcade.Window):
         # This command should happen before we start drawing. It will clear
         # the screen to the background color, and erase what we drew last frame.
         arcade.start_render()
-        # glEnable(GL_TEXTURE_2D)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        # # glEnable(GL_TEXTURE_2D)
+        # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+        # glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        arcade.set_viewport(0,
+                            SCREEN_WIDTH,
+                            0,
+                            SCREEN_HEIGHT
+                            )
 
-        self.wall_list.draw()
-        self.dot_list.draw()
-        self.ball_list.draw()
+        self.wall_list.draw(filter=GL_NEAREST)
+        self.dot_list.draw(filter=GL_NEAREST)
+        self.ball_list.draw(filter=GL_NEAREST)
         # Call draw() on all your sprite lists below
 
     def on_update(self, delta_time):
@@ -133,7 +140,7 @@ class MyGame(arcade.Window):
 
 def main():
     """ Main method """
-    game = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    game = MyGame(WINDOW_WIDTH, WINDOW_HEIGHT, SCREEN_TITLE)
     game.setup()
     arcade.run()
 
