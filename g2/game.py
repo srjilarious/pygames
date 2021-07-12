@@ -43,15 +43,20 @@ class MyGame(arcade.Window):
         self.dot_list = None
         self.player = None
         self.score = 0
-        self.keys = { UP: False, DOWN: False, LEFT:False, RIGHT:False, H:False, C:False, ENTER:False}
+        self.keys = { UP: False, DOWN: False, LEFT:False, RIGHT:False, H:False, C:False, F:False, ENTER:False, ESCAPE:False}
 
-    def create_dot(self):
-        cx = random.randrange(SCREEN_WIDTH)
-        cy = random.randrange(SCREEN_HEIGHT)
+    def create_dot(self, cx=None, cy=None):
+
+        if cx is None:
+            cx = random.randrange(SCREEN_WIDTH)
+        if cy is None:
+            cy = random.randrange(SCREEN_HEIGHT)
+
         dot = arcade.Sprite("../assets/power_dot.png", 1)
         dot.center_x = cx
         dot.center_y = cy
         self.dot_list.append(dot)
+        return dot
 
     def setup(self):
         self.dot_list = arcade.SpriteList()
@@ -98,7 +103,15 @@ class MyGame(arcade.Window):
         if self.keys[H]:
             self.create_dot()
         if self.keys[C]:
-            self.dot_list.clear()
+            for d in self.dot_list:
+                d.kill()
+        if self.keys[F]:
+            for y in range(0, SCREEN_HEIGHT, DOT_RADIUS):
+                for x in range(0, SCREEN_WIDTH, DOT_RADIUS):
+                    self.create_dot(x, y)
+        if self.keys[ESCAPE]:
+            arcade.close_window()
+            
         # if pressed_keys[K_ESCAPE]:
         #     self.running = False
     
@@ -116,16 +129,16 @@ class MyGame(arcade.Window):
 
 
     def move_up(self):
-        self.player.center_y = min(self.player.center_y + SPEED,  SCREEN_HEIGHT - PLAYER_RADIUS)
+        self.player.center_y = min(self.player.center_y + SPEED,  SCREEN_HEIGHT + PLAYER_RADIUS)
 
     def move_down(self):
-        self.player.center_y = max(PLAYER_RADIUS, self.player.center_y - SPEED)
+        self.player.center_y = max(-PLAYER_RADIUS, self.player.center_y - SPEED)
 
     def move_left(self):
-        self.player.center_x = max(PLAYER_RADIUS, self.player.center_x - SPEED)
+        self.player.center_x = max(-PLAYER_RADIUS, self.player.center_x - SPEED)
 
     def move_right(self):
-        self.player.center_x = min(self.player.center_x + SPEED, SCREEN_WIDTH - PLAYER_RADIUS)
+        self.player.center_x = min(self.player.center_x + SPEED, SCREEN_WIDTH + PLAYER_RADIUS)
 
 
     def on_key_press(self, key, key_modifiers):
