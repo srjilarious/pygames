@@ -4,12 +4,21 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Game State Test",
+            "type": "python",
+            "request": "launch",
+            "program": "game.py",
+            "env": {"DISPLAY": ":0"},
+            "cwd": "${workspaceFolder}/game_state_test"
         },
         {
             "name": "Python: Remman",

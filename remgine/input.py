@@ -1,20 +1,17 @@
 # A class for input related classes
-
-import pygame
 import collections
-from pygame.locals import *
+import arcade.key as key
 
 class Keyboard():
 
     def __init__(self):
-        self._down_keys = pygame.key.get_pressed()
-        self._last_down_keys = pygame.key.get_pressed()
+        self._down_keys = {}
+        self._last_down_keys = {}
         self._text_keys = collections.defaultdict()
         self.text_buffer = []
 
     def update(self):
-        self._last_down_keys = self._down_keys
-        self._down_keys = pygame.key.get_pressed()
+        self._last_down_keys = self._down_keys.copy()
 
     def post_update(self):
         self.text_buffer = []
@@ -33,11 +30,17 @@ class Keyboard():
     def mark_text_key_up(self, k):
         del self._text_keys[k.key]
 
+    def mark_pressed(self, k):
+        self._down_keys[k] = True
+
+    def mark_released(self, k):
+        self._down_keys[k] = False
+
     def up(self, key):
-        return not self._down_keys[key]
+        return not self._down_keys.get(key, False)
 
     def down(self, key):
-        return self._down_keys[key]
+        return self._down_keys.get(key, False)
 
     def any_down(self, keys):
         for k in keys:
@@ -46,7 +49,7 @@ class Keyboard():
         return False
     
     def pressed(self, key):
-        return self._down_keys[key] and not self._last_down_keys[key]
+        return self._down_keys.get(key, False) and not self._last_down_keys.get(key, False)
 
     def any_pressed(self, keys):
         for k in keys:
@@ -55,5 +58,5 @@ class Keyboard():
         return False
     
     def released(self, key):
-        return not self._down_keys[key] and self._last_down_keys[key]
+        return not self._down_keys.get(key, False) and self._last_down_keys.get(key, False)
 
