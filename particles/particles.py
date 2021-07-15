@@ -1,8 +1,8 @@
 import sys
 sys.path.append("..")
 
-import pygame as pg
-from pygame.locals import *
+import arcade
+from arcade.key import *
 
 import remgine
 import remgine.console
@@ -16,9 +16,8 @@ ScreenHeight = 216
 
 NumParticlesPerExplosion = 100
 
-class Particle(pg.sprite.Sprite):
+class Particle:
     def __init__(self, position=(ScreenWidth/2,ScreenHeight/2)):
-        pg.sprite.Sprite.__init__(self)
         self.speed = (random.random()*5-2.5, random.random()*5-2.5)
         self.time_left_ms = random.randint(500, 2000)
         self.color = (random.randint(10, 255), random.randint(10, 255), random.randint(100, 160), 255)
@@ -30,8 +29,8 @@ class Particle(pg.sprite.Sprite):
         self.color = (self.color[0], self.color[1], self.color[2], min(255, self.time_left_ms/20))
         return self.time_left_ms > 0
 
-    def render(self, surface):
-        pg.draw.rect(surface, self.color, pg.Rect(self.position[0], self.position[1], 4, 4))
+    def render(self):
+        arcade.draw_rectangle_filled(self.position[0], self.position[1], 4, 4, self.color)
 
 
 class Explosion:
@@ -47,16 +46,17 @@ class Explosion:
                 parts.append(p)
         self.particles = parts
         return len(parts) > 0
-    def render(self, surface):
+
+    def render(self):
         print(f"Drawing {len(self.particles)} particles")
         for p in self.particles:
-            p.render(surface)
+            p.render()
 
 class MainState(remgine.GameState):
     def __init__(self, context):
         remgine.GameState.__init__(self, context)
         
-        self.font = pg.font.Font(None, 15)
+        # self.font = pg.font.Font(None, 15)
         self.running = True
         self.score = 0
         
@@ -64,10 +64,10 @@ class MainState(remgine.GameState):
 
     def update(self):
         kb = self.context.keyboard
-        if kb.down(K_SPACE):
+        if kb.down(SPACE):
             self.explosions.append(Explosion(position=(random.randint(20, ScreenWidth-20), random.randint(20, ScreenHeight-20))))
 
-        if kb.down(K_ESCAPE):
+        if kb.down(ESCAPE):
             self.running = False
 
         exp = []
@@ -77,42 +77,20 @@ class MainState(remgine.GameState):
         self.explosions = exp
 
     def render(self):
-        self.context.off_screen.fill((0,0,0))
         for e in self.explosions:
-            e.render(self.context.off_screen)
+            e.render()
 
 if __name__ == "__main__":
     
     context = remgine.GameContext(
-        win_size=(WindowWidth, WindowHeight), 
-        screen_size=(ScreenWidth, ScreenHeight)
-    )
+            win_size=(WindowWidth, WindowHeight), 
+            screen_size=(ScreenWidth, ScreenHeight),
+            title="Game State Example"
+        )
+    
     context.game_states["main_state"] = MainState(context)
     context.curr_game_state_key = "main_state"
+    # context.components["global_keys"] = StateComponent(context)
 
-    # console = remgine.console.Console(context)
-    # context.overlay_components["console"] = console
-
-    while context.running:
-
-        # Did the user click the window close button?
-        for event in pg.event.get():
-            if event.type == QUIT:
-                context.running = False
-            elif event.type == VIDEORESIZE:
-                context.screen = pg.display.set_mode(event.size, flags=HWSURFACE|DOUBLEBUF)
-            elif event.type == KEYDOWN:
-                context.keyboard.mark_text_key_down(event)
-            elif event.type == KEYUP:
-                context.keyboard.mark_text_key_up(event)
-
-        context.update()
-        context.render()
-
-        if context.keyboard.pressed(K_ESCAPE):
-            context.running = False
-        if context.keyboard.pressed(K_BACKQUOTE):
-            console.activated = not console.activated
-
-    # Done! Time to quit.
-    pg.quit()
+    arcade.run()
+    
