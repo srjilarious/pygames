@@ -49,8 +49,10 @@ class Explosion:
 
     def render(self):
         print(f"Drawing {len(self.particles)} particles")
+        l = arcade.ShapeElementList()
         for p in self.particles:
-            p.render()
+            l.append(arcade.create_rectangle_filled(p.position[0], p.position[1], 4, 4, p.color))
+        l.draw()
 
 class MainState(remgine.GameState):
     def __init__(self, context):
