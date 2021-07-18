@@ -58,13 +58,13 @@ class GameContext(arcade.Window):
     def on_update(self, delta_time):
 
         if self.curr_game_state is not None and not self.paused:
-            self.curr_game_state.update()
+            self.curr_game_state.update(delta_time)
 
         for (k, v) in self.components.items():
-            v.update()
+            v.update(delta_time)
 
         for (k, v) in self.overlay_components.items():
-            v.update()
+            v.update(delta_time)
 
         self.keyboard.update()
         self.keyboard.post_update()

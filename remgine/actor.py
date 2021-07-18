@@ -46,6 +46,7 @@ class Actor(pygame.sprite.Sprite):
         self.render_scale = None
         self.layer = 0
         self.collide_adjust = (0, 0, 0, 0)
+
     @property
     def curr_state(self):
         return self.states[self._curr_state_key]

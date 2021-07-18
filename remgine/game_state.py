@@ -7,7 +7,7 @@ class GameState:
     def on_pause_changed(self, new_paused_value):
         pass
 
-    def update(self):
+    def update(self, delta_time):
         pass
 
     def render(self):

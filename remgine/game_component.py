@@ -4,7 +4,7 @@ class GameComponent:
         self.context = context
         self._activated = False
 
-    def update(self):
+    def update(self, delta_time):
         pass
 
     def render(self):
