@@ -1,5 +1,6 @@
-import pygame
 from enum import Enum
+
+import arcade
 
 class Frame:
     def __init__(self, time, rect, gravity=(0,0), left_gravity=(0,0)):
@@ -8,7 +9,7 @@ class Frame:
         self.gravity = gravity
         # Hack, should center drawing
         self.left_gravity = left_gravity
-        self.surface = None
+        self.texture = None
 
 class PlayType(Enum):
     Loop = 0
@@ -25,11 +26,11 @@ class Frames:
 
         # Create subsurfaces referencing our main spritesheet surface
         for i, frame in enumerate(self.frames):
-            frame.surface = self.sprite_sheet.subsurface(frame.rect)
+            frame.texture = arcade.load_textures(sprite_sheet, [frame.rect])[0]
 
-class Actor(pygame.sprite.Sprite):
+class Actor(arcade.Sprite):
     def __init__(self, states={}, curr_state_key=None, position=(0,0)):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__(None)
 
         self.states = states
         self._curr_state_key = curr_state_key
@@ -39,14 +40,15 @@ class Actor(pygame.sprite.Sprite):
 
         self.curr_frame_idx = 0
         self.curr_frame_time = 0
-        self.position = position
-        self.flip_horz = False
-        self.flip_vert = False
-        self.collide_scale = None
-        self.render_scale = None
+        # self.position = position
+        # self.flip_horz = False
+        # self.flip_vert = False
+        # self.collide_scale = None
+        # self.render_scale = None
         self.layer = 0
         self.collide_adjust = (0, 0, 0, 0)
-
+        self.reset_state()
+        
     @property
     def curr_state(self):
         return self.states[self._curr_state_key]
@@ -55,34 +57,35 @@ class Actor(pygame.sprite.Sprite):
     def curr_frame(self):
         return self.curr_state.frames[self.curr_frame_idx]
 
-    @property
-    def image(self):
-        surf = self.curr_frame.surface
+    # @property
+    # def texture(self):
+    #     return self.curr_frame.texture
+        # surf = self.curr_frame.surface
 
-        if self.render_scale is not None:
-            surf = pygame.transform.scale(surf, ((int(self.curr_frame.rect[2]*self.render_scale), int(self.curr_frame.rect[3]*self.render_scale))))
+        # if self.render_scale is not None:
+        #     surf = pygame.transform.scale(surf, ((int(self.curr_frame.rect[2]*self.render_scale), int(self.curr_frame.rect[3]*self.render_scale))))
 
-        if self.flip_horz or self.flip_vert:
-            surf = pygame.transform.flip(surf, self.flip_horz, self.flip_vert)
+        # if self.flip_horz or self.flip_vert:
+        #     surf = pygame.transform.flip(surf, self.flip_horz, self.flip_vert)
         
-        return surf
+        # return surf
 
-    @property
-    def collide_rect(self):
-        r = pygame.Rect(self.position[0]+self.collide_adjust[0], 
-                        self.position[1]+self.collide_adjust[1], 
-                        self.collide_adjust[2], 
-                        self.collide_adjust[3])
-        if self.collide_scale is not None:
-            r = pygame.Rect(r.topleft, (int(r.width*self.collide_scale), int(r.height*self.collide_scale)))
-        return r
+    # @property
+    # def collide_rect(self):
+    #     r = pygame.Rect(self.position[0]+self.collide_adjust[0], 
+    #                     self.position[1]+self.collide_adjust[1], 
+    #                     self.collide_adjust[2], 
+    #                     self.collide_adjust[3])
+    #     if self.collide_scale is not None:
+    #         r = pygame.Rect(r.topleft, (int(r.width*self.collide_scale), int(r.height*self.collide_scale)))
+    #     return r
 
-    @property
-    def rect(self):
-        if self.render_scale is not None:
-            return pygame.Rect(self.draw_position, (int(self.curr_frame.rect[2]*self.render_scale), int(self.curr_frame.rect[3]*self.render_scale)))
-        else:
-            return pygame.Rect(self.draw_position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
+    # @property
+    # def rect(self):
+    #     if self.render_scale is not None:
+    #         return pygame.Rect(self.draw_position, (int(self.curr_frame.rect[2]*self.render_scale), int(self.curr_frame.rect[3]*self.render_scale)))
+    #     else:
+    #         return pygame.Rect(self.draw_position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
 
     @property
     def draw_position(self):
@@ -104,12 +107,13 @@ class Actor(pygame.sprite.Sprite):
     def reset_state(self):
         self.curr_frame_time = 0
         self.curr_frame_idx = 0
+        self.texture = self.curr_frame.texture
 
     def move(self, x, y):
         self.position = (self.position[0] + x, self.position[1] + y)
 
-    def draw(self, screen):
-        screen.blit(self.image, self.draw_position)
+    # def draw(self, screen):
+    #     screen.blit(self.image, self.draw_position)
 
     def update(self, time_elapsed_ms, context):
         self.curr_frame_time += time_elapsed_ms
@@ -132,3 +136,5 @@ class Actor(pygame.sprite.Sprite):
 
                     if self.curr_state.next_state_key is not None:
                         self.curr_state_key = self.curr_state.next_state_key
+            
+            self.texture = self.curr_frame.texture
