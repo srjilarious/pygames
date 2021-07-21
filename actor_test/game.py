@@ -12,7 +12,7 @@ ScreenWidth = 360
 ScreenHeight = 180
 PlayerStartX = 25
 PlayerStartY = 25
-Speed = 0.5
+Speed = 1
 
 RamonaSheet = "ramona_test.png"
 
@@ -66,18 +66,18 @@ class PlayState(remgine.GameState):
 
 
     def move_up(self):
-        self.player.move(0, -Speed)
+        self.player.center_y += Speed
 
     def move_down(self):
-        self.player.move(0, Speed)
+        self.player.center_y -= Speed
 
     def move_left(self):
-        self.player.flip_horz = True
-        self.player.move(-Speed, 0)
+        self.player.flipped_horizontally = True
+        self.player.center_x -= Speed
 
     def move_right(self):
-        self.player.flip_horz = False
-        self.player.move(Speed, 0)
+        self.player.flipped_horizontally = False
+        self.player.center_x += Speed
 
     def update(self, delta_time):
         kb = self.context.keyboard
@@ -85,24 +85,28 @@ class PlayState(remgine.GameState):
             self.player.curr_state_key = "standing"
         if kb.pressed(key.S):
             self.player.curr_state_key = "walking"
-        if kb.pressed(key.D):
+        if kb.down(key.D):
             self.player.curr_state_key = "hit"
         # pressed_keys = pygame.key.get_pressed()
 
-        # if self.player.curr_state_key != "hit":
-        #     moved = False
-        #     if pressed_keys[K_UP]:
-        #         moved = True
-        #         self.move_up()
-        #     if pressed_keys[K_DOWN]:
-        #         moved = True
-        #         self.move_down()
-        #     if pressed_keys[K_LEFT]:
-        #         moved = True
-        #         self.move_left()
-        #     if pressed_keys[K_RIGHT]:
-        #         moved = True
-        #         self.move_right()
+        if self.player.curr_state_key != "hit":
+            moved = False
+            if kb.down(key.UP):
+                moved = True
+                self.move_up()
+            if kb.down(key.DOWN):
+                moved = True
+                self.move_down()
+            if kb.down(key.LEFT):
+                moved = True
+                self.move_left()
+            if kb.down(key.RIGHT):
+                moved = True
+                self.move_right()
+            if moved:
+                self.player.curr_state_key = "walking"
+            else:
+                self.player.curr_state_key = "standing"
 
         #     if self.joystick is not None:
         #         jx, jy = self.joystick.get_hat(0)
@@ -119,18 +123,15 @@ class PlayState(remgine.GameState):
         #             moved = True
         #             self.move_right()
 
-        #     if moved:
-        #         self.player.curr_state_key = "walking"
-        #     else:
-        #         self.player.curr_state_key = "standing"
 
-        # if pressed_keys[K_f]:
-        #     self.player.curr_state_key = "hit";
-        # if pressed_keys[K_RETURN]:
-        #     self.player_x = PlayerStartX
-        #     self.player_y = PlayerStartY
-        # if pressed_keys[K_ESCAPE]:
-        #     self.running = False
+
+        if kb.down(key.F):
+            self.player.curr_state_key = "hit";
+        if kb.pressed(key.ENTER):
+            self.center_x = PlayerStartX
+            self.center_y = PlayerStartY
+        if kb.pressed(key.ESCAPE):
+            arcade.close_window()
 
         self.player.update(delta_time*1000.0, self.context)
 
