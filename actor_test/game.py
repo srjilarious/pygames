@@ -27,7 +27,7 @@ class PlayState(remgine.GameState):
             [ 
                 remgine.Frame(400, (468, 124, 44, 65)),
                 remgine.Frame(400, (468, 190, 44, 65), (1, 0), (-1, 0)),
-            ]),
+            ], allows_flip_horz=True),
             "walking": remgine.Frames(RamonaSheet, 
             [ 
                 remgine.Frame(100, (0, 182, 54, 67)),
@@ -38,7 +38,7 @@ class PlayState(remgine.GameState):
                 remgine.Frame(100, (216, 182, 54, 67)),
                 remgine.Frame(100, (446, 0, 54, 67)),
                 remgine.Frame(100, (270, 182, 54, 67)),
-            ]),
+            ], allows_flip_horz=True),
             "hit": remgine.Frames(RamonaSheet, 
             [ 
                 remgine.Frame(60, (0, 0, 98, 91), (4, 24), (38, 24)),
@@ -49,7 +49,7 @@ class PlayState(remgine.GameState):
                 remgine.Frame(60, (196, 91, 98, 91), (4, 24), (38, 24)),
                 remgine.Frame(60, (294, 0, 98, 91), (4, 24), (38, 24)),
                 remgine.Frame(60, (294, 91, 98, 91), (4, 24), (38, 24)),
-            ], next_state="standing", play_type=remgine.PlayType.Once)
+            ], allows_flip_horz=True, next_state="standing", play_type=remgine.PlayType.Once)
         })
 
         self.player.center_x = 180
@@ -72,11 +72,11 @@ class PlayState(remgine.GameState):
         self.player.center_y -= Speed
 
     def move_left(self):
-        self.player.flipped_horizontally = True
+        self.player.flip_horz = True
         self.player.center_x -= Speed
 
     def move_right(self):
-        self.player.flipped_horizontally = False
+        self.player.flip_horz = False
         self.player.center_x += Speed
 
     def update(self, delta_time):

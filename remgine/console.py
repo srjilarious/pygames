@@ -1,8 +1,8 @@
-from pygame.constants import (
-        K_BACKSPACE, KMOD_NONE, K_RETURN, K_UP, K_DOWN, K_END
-    )
+# from pygame.constants import (
+#         K_BACKSPACE, KMOD_NONE, K_RETURN, K_UP, K_DOWN, K_END
+#     )
 from remgine.game_component import GameComponent
-import pygame as pg
+# import pygame as pg
 
 class Console(GameComponent):
 

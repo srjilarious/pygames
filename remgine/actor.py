@@ -6,6 +6,8 @@ class Frame:
     def __init__(self, time, rect, gravity=(0,0), left_gravity=(0,0)):
         self.time = time
         self.rect = rect
+        self.width = rect[2]
+        self.height = rect[3]
         self.gravity = gravity
         # Hack, should center drawing
         self.left_gravity = left_gravity
@@ -17,16 +19,21 @@ class PlayType(Enum):
 
 
 class Frames:
-    def __init__(self, sprite_sheet, frames, next_state=None, play_type=PlayType.Loop, on_done=None):
+    def __init__(self, sprite_sheet, frames, allows_flip_horz=False, next_state=None, play_type=PlayType.Loop, on_done=None):
         self.frames = frames
         self.sprite_sheet = sprite_sheet
         self.next_state_key = next_state
         self.play_type = play_type
         self.on_done = on_done
+        self.allows_flip_horz = allows_flip_horz
+        self.texture = None
+        self.texture_h = None
 
         # Create subsurfaces referencing our main spritesheet surface
         for i, frame in enumerate(self.frames):
             frame.texture = arcade.load_textures(sprite_sheet, [frame.rect])[0]
+            if allows_flip_horz:
+                frame.texture_h = arcade.load_textures(sprite_sheet, [frame.rect], mirrored=True)[0]
 
 class Actor(arcade.Sprite):
     def __init__(self, states={}, curr_state_key=None, position=(0,0)):
@@ -41,14 +48,14 @@ class Actor(arcade.Sprite):
         self.curr_frame_idx = 0
         self.curr_frame_time = 0
         # self.position = position
-        # self.flip_horz = False
-        # self.flip_vert = False
+        self.flip_horz = False
+        self.flip_vert = False
         # self.collide_scale = None
         # self.render_scale = None
         self.layer = 0
         self.collide_adjust = (0, 0, 0, 0)
         self.reset_state()
-        
+
     @property
     def curr_state(self):
         return self.states[self._curr_state_key]
@@ -107,13 +114,22 @@ class Actor(arcade.Sprite):
     def reset_state(self):
         self.curr_frame_time = 0
         self.curr_frame_idx = 0
-        self.texture = self.curr_frame.texture
+        self._set_curr_frame_texture()
 
     def move(self, x, y):
         self.position = (self.position[0] + x, self.position[1] + y)
 
     # def draw(self, screen):
     #     screen.blit(self.image, self.draw_position)
+
+    def _set_curr_frame_texture(self):
+        if self.flip_horz and self.curr_frame.texture_h is not None:
+            self.texture = self.curr_frame.texture_h
+        else:
+            self.texture = self.curr_frame.texture
+
+        self._set_width(self.curr_frame.width)
+        self._set_height(self.curr_frame.height)
 
     def update(self, time_elapsed_ms, context):
         self.curr_frame_time += time_elapsed_ms
@@ -137,4 +153,4 @@ class Actor(arcade.Sprite):
                     if self.curr_state.next_state_key is not None:
                         self.curr_state_key = self.curr_state.next_state_key
             
-            self.texture = self.curr_frame.texture
+            self._set_curr_frame_texture()

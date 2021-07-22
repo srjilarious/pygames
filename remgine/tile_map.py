@@ -4,10 +4,10 @@ common actor movemnt/collision checks against map data.
 """
 
 import itertools
-import pygame as pg
-import pytmx
-from pytmx.util_pygame import load_pygame
-import pyscroll
+# import pygame as pg
+# import pytmx
+# from pytmx.util_pygame import load_pygame
+# import pyscroll
 import importlib
 from remgine.object_grid import ObjectGrid
 
