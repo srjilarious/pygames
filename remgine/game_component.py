@@ -3,6 +3,10 @@ class GameComponent:
     def __init__(self, context):
         self.context = context
         self._activated = False
+        self.setup_done = False
+
+    def setup(self):
+        self.setup_done = True
 
     def update(self, delta_time):
         pass

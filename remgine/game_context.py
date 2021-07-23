@@ -18,6 +18,7 @@ class GameContext(arcade.Window):
         self.components = {}
         self.overlay_components = {}
         self.keyboard = Keyboard()
+        self.setup_done = False
 
     @property
     def curr_game_state(self):
@@ -34,7 +35,16 @@ class GameContext(arcade.Window):
             self.curr_game_state.on_pause_changed(value)
 
     def setup(self):
-        pass
+        self.setup_done = True
+
+        for (k, v) in self.game_states.items():
+            v.setup()
+
+        for (k, v) in self.components.items():
+            v.setup()
+
+        for (k, v) in self.overlay_components.items():
+            v.setup()
 
     def on_draw(self):
         """
@@ -44,17 +54,19 @@ class GameContext(arcade.Window):
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
         arcade.set_viewport(0, self.screen_size[0], 0, self.screen_size[1])
-        if self.curr_game_state is not None:
-            self.curr_game_state.render()
-        
-        for (k, v) in self.components.items():
-            v.render()
 
-        # Overlay components render at the window resolution
-        if len(self.overlay_components) > 0:
-            arcade.set_viewport(0, self.win_size[0], 0, self.win_size[1])
-            for (k, v) in self.overlay_components.items():
+        if self.setup_done:
+            if self.curr_game_state is not None:
+                self.curr_game_state.render()
+            
+            for (k, v) in self.components.items():
                 v.render()
+
+            # Overlay components render at the window resolution
+            if len(self.overlay_components) > 0:
+                arcade.set_viewport(0, self.win_size[0], 0, self.win_size[1])
+                for (k, v) in self.overlay_components.items():
+                    v.render()
 
     def on_update(self, delta_time):
 

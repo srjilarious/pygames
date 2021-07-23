@@ -21,6 +21,14 @@
             "cwd": "${workspaceFolder}/game_state_test"
         },
         {
+            "name": "Font Test",
+            "type": "python",
+            "request": "launch",
+            "program": "arcade_font.py",
+            "env": {"DISPLAY": ":0"},
+            "cwd": "${workspaceFolder}/arcade_tests"
+        },
+        {
             "name": "Actor Test",
             "type": "python",
             "request": "launch",
