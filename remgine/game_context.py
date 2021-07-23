@@ -51,9 +51,10 @@ class GameContext(arcade.Window):
             v.render()
 
         # Overlay components render at the window resolution
-        arcade.set_viewport(0, self.win_size[0], 0, self.win_size[1])
-        for (k, v) in self.overlay_components.items():
-            v.render()
+        if len(self.overlay_components) > 0:
+            arcade.set_viewport(0, self.win_size[0], 0, self.win_size[1])
+            for (k, v) in self.overlay_components.items():
+                v.render()
 
     def on_update(self, delta_time):
 
