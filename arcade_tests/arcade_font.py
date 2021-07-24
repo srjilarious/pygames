@@ -57,7 +57,9 @@ class FontOverlayComponent(remgine.GameComponent):
         
     def render(self):
         # arcade.draw_text("Testing Testing!", 10, 10, (255, 255, 255), font_size=12, font_name="AmigaTopaz.ttf")
-        arcade.draw_text("Testing Testing!", 10, 10, (255, 255, 255), font_size=30, font_name="../assets/Inconsolata-Regular.ttf")
+        main_text = arcade.draw_text("Testing Testing!\nTest Test\nAgain and again!!", 10, 80, (255, 255, 255), font_size=30, font_name="../assets/Inconsolata-Regular.ttf")
+        arcade.draw_text(">>>>>>>>", 10, 80 + main_text.height, (200, 200, 255), font_size=30, font_name="../assets/Inconsolata-Regular.ttf")
+
         # arcade.draw_text("Testing Testing!", 10, 10, (255, 255, 255), font_size=20, font_name="DejaVu Sans Mono")
         # arcade.draw_text("Testing Testing!", 10, 50, (255, 255, 255), font_size=30)
         # self.text.draw()
