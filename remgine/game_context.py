@@ -83,9 +83,11 @@ class GameContext(arcade.Window):
         self.keyboard.post_update()
 
     def on_key_press(self, key, key_modifiers):
+        self.keyboard.mark_text_key_down(key)
         self.keyboard.mark_pressed(key)
 
     def on_key_release(self, key, key_modifiers):
+        self.keyboard.mark_text_key_up(key)
         self.keyboard.mark_released(key)
 
     

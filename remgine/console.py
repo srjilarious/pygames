@@ -1,47 +1,46 @@
-# from pygame.constants import (
-#         K_BACKSPACE, KMOD_NONE, K_RETURN, K_UP, K_DOWN, K_END
-#     )
-from remgine.game_component import GameComponent
+import os
 
 import arcade
 import arcade.key as key
 
+from remgine.game_component import GameComponent
+
+SCRIPT_ROOT = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_FONT_NAME=os.path.join(SCRIPT_ROOT, "..", "assets", "Inconsolata-Regular.ttf")
+
 class Console(GameComponent):
 
-    def __init__(self, context, font=None):
+    def __init__(self, context, font_name=None):
         GameComponent.__init__(self, context)
         self._context = context
-        width = context.win_size[0],context.win_size[0]
-        height = context.win_size[0],context.win_size[1]
-        self._console_bg = arcade.create_rectangle_filled(width/2, height/2, width, height, (40, 40, 220, 180))
-        #pg.Surface((), pg.SRCALPHA) 
-        # self.font = font
-        # if self.font is None:
-        #     self.font = pg.font.Font("assets/AmigaTopaz.ttf", 30)
+        width = context.win_size[0]
+        height = context.win_size[1]
+        self._console_bg = arcade.create_rectangle_filled(width/2, int(3*height/4), width, height/2, (40, 40, 220, 180))
         self.lines = []
         self._line_render_offset = 0
         self._line = ""
+        self.font_name = font_name or DEFAULT_FONT_NAME
 
-    def update(self):
+    def update(self, delta_time):
         kb = self._context.keyboard
 
-        # for k in self._context.keyboard.text_buffer:
+        for k in self._context.keyboard.text_buffer:
         #     # if k.mod == KMOD_NONE:
-        #     if k.key == K_BACKSPACE:
-        #         self._line = self._line[:-1]
-        #     elif k.key == K_RETURN:
-        #         self.lines.append(self._line)
-        #         self._line = ""
-        #     elif k.key == K_UP:
-        #         if self._line_render_offset < len(self.lines):
-        #             self._line_render_offset += 1
-        #     elif k.key == K_DOWN:
-        #         if self._line_render_offset > 0:
-        #             self._line_render_offset -= 1
-        #     elif k.key == K_END:
-        #         self._line_render_offset = 0
-        #     elif k.unicode != '':
-        #         self._line += k.unicode
+            if k == key.BACKSPACE:
+                self._line = self._line[:-1]
+            elif k == key.ENTER:
+                self.lines.append(self._line)
+                self._line = ""
+            elif k == key.UP:
+                if self._line_render_offset < len(self.lines):
+                    self._line_render_offset += 1
+            elif k == key.DOWN:
+                if self._line_render_offset > 0:
+                    self._line_render_offset -= 1
+            elif k == key.END:
+                self._line_render_offset = 0
+            elif k != '':
+                self._line += chr(k)
 
     @property
     def activated(self):
@@ -56,24 +55,25 @@ class Console(GameComponent):
 
     def render(self):
         if self.activated:
-            # console_rect = pg.Rect(
-            #         0, 0, 
-            #         self._context.win_size[0], 
-            #         int(self._context.win_size[1]/2)
-            #     )
-            # pg.draw.rect(self._console_surf, (40, 40, 220, 180), console_rect)
-            self.rect.draw()
+            self._console_bg.draw()
+
             # Draw the input line at the bottom first
-            # txt = self.font.render(self._line, False, pg.Color('white'))
-            # curr_y = int(self._context.win_size[1]/2) - txt.get_size()[1]
-            # self._console_surf.blit(txt, (5, curr_y))
+            curr_y = int(self._context.win_size[1]/2)
+            text = arcade.draw_text(self._line, 
+                            2, curr_y, 
+                            (220, 220, 50), 
+                            font_size=25,
+                            font_name=self.font_name)
 
-            # for l in reversed(self.lines[:len(self.lines)-self._line_render_offset]):
-                # txt = self.font.render(l, False, pg.Color('white'))
-                # curr_y -= int(txt.get_size()[1])
-                # self._console_surf.blit(txt, (5, curr_y))
+            curr_y += text.height
 
-                # if(curr_y < -txt.get_size()[1]):
-                    # break
+            for l in reversed(self.lines[:len(self.lines)-self._line_render_offset]):
+                text = arcade.draw_text(l, 
+                            2, curr_y, 
+                            (120, 255, 255), 
+                            font_size=25,
+                            font_name=self.font_name)
+                curr_y += text.height
 
-            # self._context.screen.blit(self._console_surf, (0, 0))
+                if(curr_y > self.context.win_size[1]+text.height):
+                    break

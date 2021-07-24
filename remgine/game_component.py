@@ -18,6 +18,9 @@ class GameComponent:
     def activated(self):
         return self._activated
 
+    def toggle_active(self):
+        self._activated = not self._activated
+
     @activated.setter
     def activated(self, value):
         self._activated = value

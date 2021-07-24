@@ -17,18 +17,18 @@ class Keyboard():
         self.text_buffer = []
 
     def mark_text_key_down(self, k):
-        if k.unicode is None:
+        if k is None:
             return
         
-        if k.key not in self._text_keys:
+        if k not in self._text_keys:
             # print(f"Adding key '{k.unicode}' to text buffer")
             self.text_buffer.append(k)
 
         # Rest any timing for this key.
-        self._text_keys[k.key] = (k, 0)
+        self._text_keys[k] = (k, 0)
     
     def mark_text_key_up(self, k):
-        del self._text_keys[k.key]
+        del self._text_keys[k]
 
     def mark_pressed(self, k):
         self._down_keys[k] = True
