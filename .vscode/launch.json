@@ -4,20 +4,21 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
-            "name": "Python: Current File",
+            "name": "Pytest",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
+            "module": "pytest",
+            "cwd": "${workspaceFolder}/tests"
         },
         {
             "name": "Game State Test",
             "type": "python",
             "request": "launch",
             "program": "game.py",
-            "env": {"DISPLAY": ":0"},
+            "env": {
+                "DISPLAY": ":0"
+            },
             "cwd": "${workspaceFolder}/game_state_test"
         },
         {
@@ -25,7 +26,9 @@
             "type": "python",
             "request": "launch",
             "program": "arcade_font.py",
-            "env": {"DISPLAY": ":0"},
+            "env": {
+                "DISPLAY": ":0"
+            },
             "cwd": "${workspaceFolder}/arcade_tests"
         },
         {
@@ -33,7 +36,9 @@
             "type": "python",
             "request": "launch",
             "program": "game.py",
-            "env": {"DISPLAY": ":0"},
+            "env": {
+                "DISPLAY": ":0"
+            },
             "cwd": "${workspaceFolder}/actor_test"
         },
         {
@@ -41,7 +46,9 @@
             "type": "python",
             "request": "launch",
             "program": "game.py",
-            "env": {"DISPLAY": ":0"},
+            "env": {
+                "DISPLAY": ":0"
+            },
             "cwd": "${workspaceFolder}/remman"
         }
     ]
