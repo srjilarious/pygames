@@ -1,14 +1,14 @@
 """
-A class using pytile and pyscroll to load/render tileed maps adding on
+A class using pytiled_parser and arcade to load/render tiled maps adding on
 common actor movemnt/collision checks against map data.
 """
 
 import itertools
-# import pygame as pg
-# import pytmx
-# from pytmx.util_pygame import load_pygame
-# import pyscroll
 import importlib
+
+import arcade
+import pytiled_parser
+
 from remgine.object_grid import ObjectGrid
 
 class TileMap:
@@ -18,7 +18,7 @@ class TileMap:
 
     #--------------------------------------------------------------------------
     def __init__(self, map_path, collision_layer_name, screen_width, screen_height):
-        self.tmxdata = load_pygame(map_path)
+        self.tmxdata = arcade.tilemap.read_tmx(map_path)
 
         # level_script = self.tmxdata.properties.get("start_script")
         # if level_script is not None:
@@ -26,17 +26,18 @@ class TileMap:
         #     level_module = importlib.import_module(level_script)
         #     level_module.start()
 
-        self.map_data = pyscroll.TiledMapData(self.tmxdata)
-        self.main_tiles = self.tmxdata.get_layer_by_name(collision_layer_name)
+        self.collide_layer = arcade.tilemap.get_tilemap_layer(self.tmxdata, collision_layer_name)
+        # self.map_data = pyscroll.TiledMapData(self.tmxdata)
+        # self.main_tiles = self.tmxdata.get_layer_by_name(collision_layer_name)
         
-        buffered_renderer = pyscroll.BufferedRenderer(
-                self.map_data, 
-                (screen_width, screen_height), 
-                clamp_camera=False
-            )
-        self.group = pyscroll.PyscrollGroup(
-                map_layer=buffered_renderer
-            )
+        # buffered_renderer = pyscroll.BufferedRenderer(
+        #         self.map_data, 
+        #         (screen_width, screen_height), 
+        #         clamp_camera=False
+        #     )
+        # self.group = pyscroll.PyscrollGroup(
+        #         map_layer=buffered_renderer
+        #     )
         self.obj_grids = {}
         self.type_to_obj_layers = {}
         self.type_to_obj_grids = {}
