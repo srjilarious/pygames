@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Pytest",
             "type": "python",
@@ -20,6 +21,16 @@
                 "DISPLAY": ":0"
             },
             "cwd": "${workspaceFolder}/game_state_test"
+        },
+        {
+            "name": "Tile Map Test",
+            "type": "python",
+            "request": "launch",
+            "program": "game.py",
+            "env": {
+                "DISPLAY": ":0"
+            },
+            "cwd": "${workspaceFolder}/tile_test"
         },
         {
             "name": "Font Test",

@@ -35,9 +35,6 @@ class PlayState(remgine.GameState):
         self.running = True
         self.score = 0
         
-        self.keyboard = remgine.Keyboard()
-
-        
         # self.player = remgine.Actor({
         #     "standing": remgine.Frames(SpriteSheet, 
         #     [ 
@@ -89,6 +86,8 @@ class PlayState(remgine.GameState):
         #     remgine.Frame(100, (36, 448, 16, 16)),
         #     remgine.Frame(100, (54, 448, 16, 16)),
         # ])
+
+        self.map = remgine.tile_map.TileMap("../assets/level1.tmx", "main_layer")
 
         # self.tmxdata = load_pygame("level1.tmx")
 
@@ -227,79 +226,79 @@ class PlayState(remgine.GameState):
         # self.check_obj_collisions(self.collectible_obj_grid.get(tx, midpoint(ty_t, ty_b)))
         # self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_b))
 
-    def update_game(self):
-        self.keyboard.update()
+    def update(self, delta_time):
 
-        moved = False
-        if self.keyboard.any_down([key.UP, key.DOWN, key.LEFT, key.RIGHT]):
-            self.debug_rects.clear()
+        # moved = False
+        # if self.keyboard.any_down([key.UP, key.DOWN, key.LEFT, key.RIGHT]):
+        #     self.debug_rects.clear()
 
-        if self.keyboard.down(key.UP) and self.player.jumping == False:
-            moved = True
-            self.player.jumping = True
-            self.player.vel_y = -7
+        # if self.keyboard.down(key.UP) and self.player.jumping == False:
+        #     moved = True
+        #     self.player.jumping = True
+        #     self.player.vel_y = -7
 
-        # if self.keyboard.down(K_DOWN):
-            # moved = True
+        # # if self.keyboard.down(K_DOWN):
+        #     # moved = True
 
-        if self.keyboard.down(key.LEFT):
-            moved = True
-            self.move_left()
-        if self.keyboard.down(key.RIGHT):
-            moved = True
-            self.move_right()
+        # if self.keyboard.down(key.LEFT):
+        #     moved = True
+        #     self.move_left()
+        # if self.keyboard.down(key.RIGHT):
+        #     moved = True
+        #     self.move_right()
 
-        if self.player.vel_y < 5:
-            self.player.vel_y += 0.1
+        # if self.player.vel_y < 5:
+        #     self.player.vel_y += 0.1
 
-        if self.player.vel_y < 0:
-            self.move_up(int(self.player.vel_y))
-        else:
-            self.move_down(int(self.player.vel_y))
+        # if self.player.vel_y < 0:
+        #     self.move_up(int(self.player.vel_y))
+        # else:
+        #     self.move_down(int(self.player.vel_y))
 
 
-        # Handle joystick input
-        # if self.joystick is not None:
-        #     jx, jy = self.joystick.get_hat(0)
-        #     if jy > 0:
-        #         moved = True
-        #         self.move_up()
-        #     if jy < 0:
-        #         moved = True
-        #         self.move_down()
-        #     if jx < 0:
-        #         moved = True
-        #         self.move_left()
-        #     if jx > 0:
-        #         moved = True
-        #         self.move_right()
+        # # Handle joystick input
+        # # if self.joystick is not None:
+        # #     jx, jy = self.joystick.get_hat(0)
+        # #     if jy > 0:
+        # #         moved = True
+        # #         self.move_up()
+        # #     if jy < 0:
+        # #         moved = True
+        # #         self.move_down()
+        # #     if jx < 0:
+        # #         moved = True
+        # #         self.move_left()
+        # #     if jx > 0:
+        # #         moved = True
+        # #         self.move_right()
 
-        if moved:
-            self.player.curr_state_key = "walking"
-        else:
-            self.player.curr_state_key = "standing"
+        # if moved:
+        #     self.player.curr_state_key = "walking"
+        # else:
+        #     self.player.curr_state_key = "standing"
 
-        if self.keyboard.down(key.RETURN):
-            self.player_x = PlayerStartX
-            self.player_y = PlayerStartY
-        if self.keyboard.pressed(key.SPACE):
-            obj_list = self.interaction_obj_grid.get_from_points([
-                    self.player.rect.topleft,
-                    self.player.rect.topright,
-                    self.player.rect.bottomleft,
-                    self.player.rect.bottomright
-                ])
+        # if self.keyboard.down(key.RETURN):
+        #     self.player_x = PlayerStartX
+        #     self.player_y = PlayerStartY
+        # if self.keyboard.pressed(key.SPACE):
+        #     obj_list = self.interaction_obj_grid.get_from_points([
+        #             self.player.rect.topleft,
+        #             self.player.rect.topright,
+        #             self.player.rect.bottomleft,
+        #             self.player.rect.bottomright
+        #         ])
             
-            for o in obj_list:
-                logging.info("Interacted with {}".format(o))
-                if o.type == "hint":
-                    print("Hint: {}".format(o.properties["hint_text"]))
+        #     for o in obj_list:
+        #         logging.info("Interacted with {}".format(o))
+        #         if o.type == "hint":
+        #             print("Hint: {}".format(o.properties["hint_text"]))
 
-        if self.keyboard.down(key.ESCAPE):
-            self.running = False
+        # if self.keyboard.down(key.ESCAPE):
+        #     self.running = False
 
-        for sp in self.group:
-            sp.update(10, self)
+        # for sp in self.group:
+        #     sp.update(10, self)
+        pass
         
     def check_collide_tile(self, player_rect, x, y):
         tile = self.get_main_tile(x, y)
@@ -326,6 +325,8 @@ class PlayState(remgine.GameState):
         return self.main_tiles.data[int(y)][int(x)]
 
     def render(self):
+        self.map.draw()
+
         # Fill the background with white
         # self.off_screen.fill((0,0,0))
 
@@ -360,4 +361,5 @@ if __name__ == "__main__":
     
     context.game_states["play_state"] = PlayState(context)
     context.curr_game_state_key = "play_state"
+    context.setup()
     arcade.run()

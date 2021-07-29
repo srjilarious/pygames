@@ -17,7 +17,7 @@ class TileMap:
     """
 
     #--------------------------------------------------------------------------
-    def __init__(self, map_path, collision_layer_name, screen_width, screen_height):
+    def __init__(self, map_path, collision_layer_name):
         self.tmxdata = arcade.tilemap.read_tmx(map_path)
 
         # level_script = self.tmxdata.properties.get("start_script")
@@ -27,6 +27,7 @@ class TileMap:
         #     level_module.start()
 
         self.collide_layer = arcade.tilemap.get_tilemap_layer(self.tmxdata, collision_layer_name)
+        self.collide_layer_sprites = arcade.process_layer(self.tmxdata, collision_layer_name)
         # self.map_data = pyscroll.TiledMapData(self.tmxdata)
         # self.main_tiles = self.tmxdata.get_layer_by_name(collision_layer_name)
         
@@ -44,7 +45,7 @@ class TileMap:
 
         # Look for an interactions property on the map.  We expect a set of 
         # lines with 'layer:game_type' to add to our list.
-        interaction_property = self.tmxdata.properties["interaction"]
+        interaction_property = self.tmxdata.properties.get("interaction", "")
         print(f"Got property: {interaction_property}")
         for line in interaction_property.splitlines():
             split = line.split(':')
@@ -272,3 +273,6 @@ class TileMap:
             obj_grid.insert_obj((obj.x, obj.y, obj.width, obj.height), obj)
         self.obj_grids[layer_name] = (obj_grid, context, hit_callback)
         return obj_grid
+
+    def draw(self):
+        self.collide_layer_sprites.draw()
