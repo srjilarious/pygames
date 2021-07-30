@@ -8,6 +8,7 @@ import importlib
 
 import arcade
 import pytiled_parser
+from pytiled_parser.objects import TileLayer
 
 from remgine.object_grid import ObjectGrid
 
@@ -27,7 +28,14 @@ class TileMap:
         #     level_module.start()
 
         self.collide_layer = arcade.tilemap.get_tilemap_layer(self.tmxdata, collision_layer_name)
-        self.collide_layer_sprites = arcade.process_layer(self.tmxdata, collision_layer_name)
+        
+        tile_layers = list(filter(lambda item: isinstance(item, TileLayer), self.tmxdata.layers))
+        self.layer_sprites = []
+
+        for tl in tile_layers:
+            spr = arcade.process_layer(self.tmxdata, tl.name)
+            self.layer_sprites.append(spr)
+
         # self.map_data = pyscroll.TiledMapData(self.tmxdata)
         # self.main_tiles = self.tmxdata.get_layer_by_name(collision_layer_name)
         
@@ -275,4 +283,6 @@ class TileMap:
         return obj_grid
 
     def draw(self):
-        self.collide_layer_sprites.draw()
+        for layer in self.layer_sprites:
+            layer.draw()
+            # self.collide_layer_sprites.draw()
