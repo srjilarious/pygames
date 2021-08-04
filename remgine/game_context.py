@@ -19,6 +19,8 @@ class GameContext(arcade.Window):
         self.overlay_components = {}
         self.keyboard = Keyboard()
         self.setup_done = False
+        self.scroll_x = 0
+        self.scroll_y = 0
 
     @property
     def curr_game_state(self):
@@ -53,7 +55,9 @@ class GameContext(arcade.Window):
         arcade.start_render()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-        arcade.set_viewport(0, self.screen_size[0], 0, self.screen_size[1])
+        self.scroll_x = int(self.scroll_x)
+        self.scroll_y = int(self.scroll_y)
+        arcade.set_viewport(self.scroll_x, self.screen_size[0] + self.scroll_x, self.scroll_y, self.screen_size[1] + self.scroll_y)
 
         if self.setup_done:
             if self.curr_game_state is not None:

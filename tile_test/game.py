@@ -227,9 +227,19 @@ class PlayState(remgine.GameState):
         # self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_b))
 
     def update(self, delta_time):
+        kb = self.context.keyboard
+
+        if kb.down(key.J):
+            self.context.scroll_x -= 4
+        if kb.down(key.L):
+            self.context.scroll_x += 4
+        if kb.down(key.I):
+            self.context.scroll_y += 4
+        if kb.down(key.K):
+            self.context.scroll_y -= 4
 
         # moved = False
-        # if self.keyboard.any_down([key.UP, key.DOWN, key.LEFT, key.RIGHT]):
+        # if kb.any_down([key.UP, key.DOWN, key.LEFT, key.RIGHT]):
         #     self.debug_rects.clear()
 
         # if self.keyboard.down(key.UP) and self.player.jumping == False:
@@ -298,7 +308,6 @@ class PlayState(remgine.GameState):
 
         # for sp in self.group:
         #     sp.update(10, self)
-        pass
         
     def check_collide_tile(self, player_rect, x, y):
         tile = self.get_main_tile(x, y)
