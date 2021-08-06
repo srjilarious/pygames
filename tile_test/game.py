@@ -23,7 +23,7 @@ Speed = 2
 
 
 # BluePiece = pygame.image.load("blue_piece.png")
-# SpriteSheet = pygame.image.load("game_content5.png")
+SpriteSheet = "../assets/game_content5.png"
 
 def midpoint(a, b):
         return int(a + (b-a)/2)
@@ -35,6 +35,39 @@ class PlayState(remgine.GameState):
         self.running = True
         self.score = 0
         
+        self.player = remgine.Actor({
+            "standing": remgine.Frames(SpriteSheet, 
+            [ 
+                remgine.Frame(400, (557, 0, 42, 65)),
+                remgine.Frame(400, (557, 68, 42, 65), (1, 0), (-1, 0)),
+            ], allows_flip_horz=True),
+            "walking": remgine.Frames(SpriteSheet, 
+            [ 
+                remgine.Frame(100, (368, 296, 50, 65)),
+                remgine.Frame(100, (302, 358, 50, 65)),
+                remgine.Frame(100, (420, 256, 50, 65)),
+                remgine.Frame(100, (354, 363, 50, 65)),
+                remgine.Frame(100, (420, 323, 50, 65)),
+                remgine.Frame(100, (406, 390, 50, 65)),
+                remgine.Frame(100, (458, 390, 50, 65)),
+                remgine.Frame(100, (505, 0, 50, 65)),
+            ], allows_flip_horz=True),
+            "hit": remgine.Frames(SpriteSheet, 
+            [ 
+                remgine.Frame(60, (0, 0, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (98, 0, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (0, 91, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (98, 91, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (196, 0, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (196, 91, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (294, 0, 98, 91), (4, 24), (38, 24)),
+                remgine.Frame(60, (294, 91, 98, 91), (4, 24), (38, 24)),
+            ], allows_flip_horz=True, next_state="standing", play_type=remgine.PlayType.Once)
+        }, "walking")
+
+        self.player.center_x = 180
+        self.player.center_y = 90
+
         # self.player = remgine.Actor({
         #     "standing": remgine.Frames(SpriteSheet, 
         #     [ 
@@ -308,6 +341,7 @@ class PlayState(remgine.GameState):
 
         # for sp in self.group:
         #     sp.update(10, self)
+        self.player.update(delta_time*1000.0, self.context)
         
     def check_collide_tile(self, player_rect, x, y):
         tile = self.get_main_tile(x, y)
@@ -335,7 +369,7 @@ class PlayState(remgine.GameState):
 
     def render(self):
         self.map.draw()
-
+        self.player.draw()
         # Fill the background with white
         # self.off_screen.fill((0,0,0))
 
