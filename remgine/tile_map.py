@@ -141,15 +141,15 @@ class TileMap:
 
     
     #--------------------------------------------------------------------------
-    def check_move_up(self, actor, amount):
+    def check_move_down(self, actor, amount):
         """
         Checks if the actor could move left in the tile map.
         Returns (able_to_move, position_tuple)
         """
         moved = False
         # self.player_y = max(self.player_radius, self.player_y - Speed)
-        new_rect = actor.collide_rect.move(0, amount)
-        new_rect.top += 1
+        new_rect = actor.collide_rect.move(0, -amount)
+        new_rect.top -= 1
         txs = range(
             int(new_rect.left / self.tmxdata.tile_size.width),
             int((new_rect.right + self.tmxdata.tile_size.width+1) / self.tmxdata.tile_size.width)
@@ -177,14 +177,14 @@ class TileMap:
         return (moved, move_pos)
     
     #--------------------------------------------------------------------------
-    def check_move_down(self, actor, amount):
+    def check_move_up(self, actor, amount):
         """
         Checks if the actor could move left in the tile map.
         Returns (able_to_move, position_tuple)
         """
         moved = False
-        new_rect = actor.collide_rect.move(0, -amount)
-        new_rect.bottom -= 1
+        new_rect = actor.collide_rect.move(0, amount)
+        new_rect.bottom += 1
         txs = range(
             int(new_rect.left / self.tmxdata.tile_size.width),
             int((new_rect.right + self.tmxdata.tile_size.width+1) / self.tmxdata.tile_size.width)
