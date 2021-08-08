@@ -7,6 +7,7 @@ import itertools
 import importlib
 
 import arcade
+import pygame as pg
 import pytiled_parser
 from pytiled_parser.objects import TileLayer
 
@@ -76,17 +77,17 @@ class TileMap:
         new_rect.left -= 1
 
         tys = range(
-            int(new_rect.top / self.tmxdata.tileheight),
-            int((new_rect.bottom + self.tmxdata.tileheight+1) / self.tmxdata.tileheight)
+            int(new_rect.top / self.tmxdata.tile_size.height),
+            int((new_rect.bottom + self.tmxdata.tile_size.height+1) / self.tmxdata.tile_size.height)
             )
-        txs = itertools.repeat(int(new_rect.left / self.tmxdata.tilewidth), len(tys))
+        txs = itertools.repeat(int(new_rect.left / self.tmxdata.tile_size.width), len(tys))
         points = list(zip(txs, tys))
 
         # Check for tile collisions along line of interest
         hit = False
         for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
-                move_pos = ((tx+1)*self.tmxdata.tileheight, actor.position[1])
+                move_pos = ((tx+1)*self.tmxdata.tile_size.height, actor.position[1])
                 hit = True
                 moved = False
                 break
@@ -113,17 +114,17 @@ class TileMap:
         new_rect.right += 1
 
         tys = range(
-            int(new_rect.top / self.tmxdata.tileheight),
-            int((new_rect.bottom + self.tmxdata.tileheight+1) / self.tmxdata.tileheight)
+            int(new_rect.top / self.tmxdata.tile_size.height),
+            int((new_rect.bottom + self.tmxdata.tile_size.height+1) / self.tmxdata.tile_size.height)
             )
-        txs = itertools.repeat(int(new_rect.right / self.tmxdata.tilewidth), len(tys))
+        txs = itertools.repeat(int(new_rect.right / self.tmxdata.tile_size.width), len(tys))
         points = list(zip(txs, tys))
 
         # Check for tile collisions along line of interest
         hit = False
         for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
-                move_pos = ((tx)*self.tmxdata.tileheight - actor.collide_rect[2], actor.position[1])
+                move_pos = ((tx)*self.tmxdata.tile_size.height - actor.collide_rect[2], actor.position[1])
                 hit = True
                 moved = False
                 break
@@ -147,20 +148,20 @@ class TileMap:
         """
         moved = False
         # self.player_y = max(self.player_radius, self.player_y - Speed)
-        new_rect = actor.collide_rect.move(0, -amount)
-        new_rect.top -= 1
+        new_rect = actor.collide_rect.move(0, amount)
+        new_rect.top += 1
         txs = range(
-            int(new_rect.left / self.tmxdata.tilewidth),
-            int((new_rect.right + self.tmxdata.tilewidth+1) / self.tmxdata.tilewidth)
+            int(new_rect.left / self.tmxdata.tile_size.width),
+            int((new_rect.right + self.tmxdata.tile_size.width+1) / self.tmxdata.tile_size.width)
             )
-        tys = itertools.repeat(int(new_rect.top / self.tmxdata.tileheight), len(txs))
+        tys = itertools.repeat(int(new_rect.top / self.tmxdata.tile_size.height), len(txs))
         points = list(zip(txs, tys))
 
         # Check for tile collisions along line of interest
         hit = False
         for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
-                move_pos = (actor.position[0], (ty+1)*self.tmxdata.tileheight)
+                move_pos = (actor.position[0], (ty+1)*self.tmxdata.tile_size.height)
                 hit = True
                 moved = False
                 break
@@ -182,19 +183,19 @@ class TileMap:
         Returns (able_to_move, position_tuple)
         """
         moved = False
-        new_rect = actor.collide_rect.move(0, amount)
-        new_rect.bottom += 1
+        new_rect = actor.collide_rect.move(0, -amount)
+        new_rect.bottom -= 1
         txs = range(
-            int(new_rect.left / self.tmxdata.tilewidth),
-            int((new_rect.right + self.tmxdata.tilewidth+1) / self.tmxdata.tilewidth)
+            int(new_rect.left / self.tmxdata.tile_size.width),
+            int((new_rect.right + self.tmxdata.tile_size.width+1) / self.tmxdata.tile_size.width)
             )
-        tys = itertools.repeat(int(new_rect.bottom / self.tmxdata.tileheight), len(txs))
+        tys = itertools.repeat(int(new_rect.bottom / self.tmxdata.tile_size.height), len(txs))
         points = list(zip(txs, tys))
         # Check for tile collisions along line of interest
         hit = False
         for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
-                move_pos = (actor.position[0], (ty)*self.tmxdata.tileheight -actor.collide_rect[3])
+                move_pos = (actor.position[0], (ty)*self.tmxdata.tile_size.height -actor.collide_rect[3])
                 hit = True
                 moved = False
                 break
@@ -229,14 +230,16 @@ class TileMap:
         tile = self.get_main_tile(x, y)
 
         # Grab our tile properties, if any
-        tile_props = self.tmxdata.tile_properties.get(tile, {})
+        # if tile == 0:
+        #     return False
+        # tile_props = self.tmxdata.tile_properties.get(tile, {})
 
-        # If a tile in our set is marked as non-blocking, then don't collide.
-        if tile_props.get("blocks", "all") == "none":
-            return False
+        # # If a tile in our set is marked as non-blocking, then don't collide.
+        # if tile_props.get("blocks", "all") == "none":
+        #     return False
 
-        tw = self.tmxdata.tilewidth
-        th = self.tmxdata.tileheight
+        tw = self.tmxdata.tile_size.width
+        th = self.tmxdata.tile_size.height
         if tile != 0:
             collide_rect = pg.Rect(int(x*tw), int(y*th), tw, th)
             # TODO: Add debug rect back in
@@ -249,7 +252,8 @@ class TileMap:
 
     #--------------------------------------------------------------------------
     def get_main_tile(self, x, y):
-        return self.main_tiles.data[int(y)][int(x)]
+        y_height = len(self.collide_layer.layer_data)
+        return self.collide_layer.layer_data[int(y_height-y)][int(x)]
 
     #--------------------------------------------------------------------------
     def create_obj_grid(self, layer_name, create_callback, hit_callback, context):
@@ -263,8 +267,8 @@ class TileMap:
         obj_grid = ObjectGrid(
                 self.tmxdata.width, 
                 self.tmxdata.height, 
-                self.tmxdata.tilewidth, 
-                self.tmxdata.tileheight
+                self.tmxdata.tile_size.width, 
+                self.tmxdata.tile_size.height
             )
         obj_group = self.tmxdata.get_layer_by_name(layer_name)
         for obj in self.type_to_obj_layers[layer_name]:

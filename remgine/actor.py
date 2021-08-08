@@ -2,6 +2,8 @@ from enum import Enum
 
 import arcade
 
+import pygame # Just for Rect collisions
+
 class Frame:
     def __init__(self, time, rect, gravity=(0,0), left_gravity=(0,0)):
         self.time = time
@@ -52,6 +54,7 @@ class Actor(arcade.Sprite):
         self.flip_vert = False
         # self.collide_scale = None
         # self.render_scale = None
+        self.game_type = None
         self.layer = 0
         self.collide_adjust = (0, 0, 0, 0)
         self.reset_state()
@@ -77,15 +80,15 @@ class Actor(arcade.Sprite):
         
         # return surf
 
-    # @property
-    # def collide_rect(self):
-    #     r = pygame.Rect(self.position[0]+self.collide_adjust[0], 
-    #                     self.position[1]+self.collide_adjust[1], 
-    #                     self.collide_adjust[2], 
-    #                     self.collide_adjust[3])
-    #     if self.collide_scale is not None:
-    #         r = pygame.Rect(r.topleft, (int(r.width*self.collide_scale), int(r.height*self.collide_scale)))
-    #     return r
+    @property
+    def collide_rect(self):
+        r = pygame.Rect(self.position[0]+self.collide_adjust[0], 
+                        self.position[1]+self.collide_adjust[1], 
+                        self.collide_adjust[2], 
+                        self.collide_adjust[3])
+        # if self.collide_scale is not None:
+        #     r = pygame.Rect(r.topleft, (int(r.width*self.collide_scale), int(r.height*self.collide_scale)))
+        return r
 
     # @property
     # def rect(self):

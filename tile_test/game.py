@@ -65,8 +65,7 @@ class PlayState(remgine.GameState):
             ], allows_flip_horz=True, next_state="standing", play_type=remgine.PlayType.Once)
         }, "walking")
 
-        self.player.center_x = 180
-        self.player.center_y = 90
+        self.player.position = (280,150)
 
         # self.player = remgine.Actor({
         #     "standing": remgine.Frames(SpriteSheet, 
@@ -86,7 +85,8 @@ class PlayState(remgine.GameState):
         #         remgine.Frame(100, (505, 0, 50, 65)),
         #     ])
         # }, "standing", (100, 100))
-        # self.player.collide_adjust = (0, 0, 50, 60)
+        
+        self.player.collide_adjust = (0, 0, 50, 60)
         # self.player.jumping = False
         # self.player.vel_y = 0
 
@@ -270,6 +270,15 @@ class PlayState(remgine.GameState):
             self.context.scroll_y += 4
         if kb.down(key.K):
             self.context.scroll_y -= 4
+
+        if kb.down(key.UP):
+            (_moved, self.player.position) = self.map.check_move_up(self.player, 4)
+        if kb.down(key.DOWN):
+            (_moved, self.player.position) = self.map.check_move_down(self.player, 4)
+        if kb.down(key.LEFT):
+            (_moved, self.player.position) = self.map.check_move_left(self.player, 4)
+        if kb.down(key.RIGHT):
+            (_moved, self.player.position) = self.map.check_move_right(self.player, 4)
 
         # moved = False
         # if kb.any_down([key.UP, key.DOWN, key.LEFT, key.RIGHT]):
