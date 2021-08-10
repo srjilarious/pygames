@@ -74,7 +74,7 @@ class TileMap:
         moved = False
         actor.flip_horz = True
         new_rect = actor.collide_rect.move(-amount, 0)
-        new_rect.left -= 1
+        new_rect.left += 1
 
         tys = range(
             int(new_rect.top / self.tmxdata.tile_size.height),
@@ -87,7 +87,7 @@ class TileMap:
         hit = False
         for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
-                move_pos = ((tx+1)*self.tmxdata.tile_size.height, actor.position[1])
+                move_pos = ((tx+1)*self.tmxdata.tile_size.width + actor.collide_rect[2]/2, actor.position[1])
                 hit = True
                 moved = False
                 break
@@ -111,7 +111,7 @@ class TileMap:
         moved = False
         actor.flip_horz = False
         new_rect = actor.collide_rect.move(amount, 0)
-        new_rect.right += 1
+        new_rect.right -= 1
 
         tys = range(
             int(new_rect.top / self.tmxdata.tile_size.height),
@@ -124,7 +124,7 @@ class TileMap:
         hit = False
         for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
-                move_pos = ((tx)*self.tmxdata.tile_size.height - actor.collide_rect[2], actor.position[1])
+                move_pos = ((tx)*self.tmxdata.tile_size.height - actor.collide_rect[2]/2, actor.position[1])
                 hit = True
                 moved = False
                 break

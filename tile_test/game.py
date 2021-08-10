@@ -66,7 +66,8 @@ class PlayState(remgine.GameState):
         }, "walking")
 
         self.player.position = (280,150)
-
+        self.player.collide_adjust = (0, 0, 40, 60)
+        # self.player.center_y = 0
         # self.player = remgine.Actor({
         #     "standing": remgine.Frames(SpriteSheet, 
         #     [ 
@@ -86,7 +87,6 @@ class PlayState(remgine.GameState):
         #     ])
         # }, "standing", (100, 100))
         
-        self.player.collide_adjust = (0, 0, 50, 60)
         # self.player.jumping = False
         # self.player.vel_y = 0
 
@@ -271,16 +271,19 @@ class PlayState(remgine.GameState):
         if kb.down(key.K):
             self.context.scroll_y -= 4
 
+        moved = False
         if kb.down(key.UP):
-            (_moved, self.player.position) = self.map.check_move_up(self.player, 4)
+            (moved, self.player.position) = self.map.check_move_up(self.player, 4)
         if kb.down(key.DOWN):
-            (_moved, self.player.position) = self.map.check_move_down(self.player, 4)
+            (moved, self.player.position) = self.map.check_move_down(self.player, 4)
         if kb.down(key.LEFT):
-            (_moved, self.player.position) = self.map.check_move_left(self.player, 4)
+            (moved, self.player.position) = self.map.check_move_left(self.player, 4)
         if kb.down(key.RIGHT):
-            (_moved, self.player.position) = self.map.check_move_right(self.player, 4)
+            (moved, self.player.position) = self.map.check_move_right(self.player, 4)
 
-        # moved = False
+        if moved:
+            self.context.scroll_x = int(self.player.position[0] - self.context.screen_size[0]/2)
+            self.context.scroll_y = int(self.player.position[1] - self.context.screen_size[1]/2)
         # if kb.any_down([key.UP, key.DOWN, key.LEFT, key.RIGHT]):
         #     self.debug_rects.clear()
 
@@ -379,6 +382,9 @@ class PlayState(remgine.GameState):
     def render(self):
         self.map.draw()
         self.player.draw()
+        # self.player.draw_hit_box((255,255,255))
+        cr = self.player.collide_rect
+        arcade.draw_rectangle_outline(cr[0] + cr[2]/2, cr[1], cr[2], cr[3], (255,255,255), 2)
         # Fill the background with white
         # self.off_screen.fill((0,0,0))
 
@@ -400,7 +406,6 @@ class PlayState(remgine.GameState):
         #     pygame.draw.rect(self.off_screen, (255,255,255), r.move((-map_offset[0], -map_offset[1])), width=1)
 
         # TODO: txt = self.font.render("Score: " + str(self.score), False, pygame.Color('white'))
-        pass
 
 
 

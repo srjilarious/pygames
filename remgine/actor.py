@@ -82,7 +82,7 @@ class Actor(arcade.Sprite):
 
     @property
     def collide_rect(self):
-        r = pygame.Rect(self.position[0]+self.collide_adjust[0], 
+        r = pygame.Rect(self.position[0]+self.collide_adjust[0]-self.collide_adjust[2]/2, 
                         self.position[1]+self.collide_adjust[1], 
                         self.collide_adjust[2], 
                         self.collide_adjust[3])
