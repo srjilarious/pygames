@@ -284,6 +284,12 @@ class PlayState(remgine.GameState):
         if moved:
             self.context.scroll_x = int(self.player.position[0] - self.context.screen_size[0]/2)
             self.context.scroll_y = int(self.player.position[1] - self.context.screen_size[1]/2)
+
+        if kb.pressed(key.ESCAPE):
+            arcade.close_window()
+        if kb.pressed(key.F1):
+            self.player.draw_collide = not self.player.draw_collide
+
         # if kb.any_down([key.UP, key.DOWN, key.LEFT, key.RIGHT]):
         #     self.debug_rects.clear()
 
@@ -382,9 +388,7 @@ class PlayState(remgine.GameState):
     def render(self):
         self.map.draw()
         self.player.draw()
-        # self.player.draw_hit_box((255,255,255))
-        cr = self.player.collide_rect
-        arcade.draw_rectangle_outline(cr[0] + cr[2]/2, cr[1], cr[2], cr[3], (255,255,255), 2)
+        
         # Fill the background with white
         # self.off_screen.fill((0,0,0))
 

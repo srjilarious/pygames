@@ -30,7 +30,7 @@ class Frames:
         self.allows_flip_horz = allows_flip_horz
         self.texture = None
         self.texture_h = None
-
+        
         # Create subsurfaces referencing our main spritesheet surface
         for i, frame in enumerate(self.frames):
             frame.texture = arcade.load_textures(sprite_sheet, [frame.rect])[0]
@@ -49,14 +49,13 @@ class Actor(arcade.Sprite):
 
         self.curr_frame_idx = 0
         self.curr_frame_time = 0
-        # self.position = position
         self.flip_horz = False
         self.flip_vert = False
-        # self.collide_scale = None
-        # self.render_scale = None
         self.game_type = None
         self.layer = 0
-        self.collide_adjust = (0, 0, 0, 0)
+        self.collide_adjust = (0, 0, 1, 1)
+        self.draw_collide = False
+        
         self.reset_state()
 
     @property
@@ -67,19 +66,6 @@ class Actor(arcade.Sprite):
     def curr_frame(self):
         return self.curr_state.frames[self.curr_frame_idx]
 
-    # @property
-    # def texture(self):
-    #     return self.curr_frame.texture
-        # surf = self.curr_frame.surface
-
-        # if self.render_scale is not None:
-        #     surf = pygame.transform.scale(surf, ((int(self.curr_frame.rect[2]*self.render_scale), int(self.curr_frame.rect[3]*self.render_scale))))
-
-        # if self.flip_horz or self.flip_vert:
-        #     surf = pygame.transform.flip(surf, self.flip_horz, self.flip_vert)
-        
-        # return surf
-
     @property
     def collide_rect(self):
         r = pygame.Rect(self.position[0]+self.collide_adjust[0]-self.collide_adjust[2]/2, 
@@ -89,13 +75,6 @@ class Actor(arcade.Sprite):
         # if self.collide_scale is not None:
         #     r = pygame.Rect(r.topleft, (int(r.width*self.collide_scale), int(r.height*self.collide_scale)))
         return r
-
-    # @property
-    # def rect(self):
-    #     if self.render_scale is not None:
-    #         return pygame.Rect(self.draw_position, (int(self.curr_frame.rect[2]*self.render_scale), int(self.curr_frame.rect[3]*self.render_scale)))
-    #     else:
-    #         return pygame.Rect(self.draw_position, (self.curr_frame.rect[2], self.curr_frame.rect[3]))
 
     @property
     def draw_position(self):
@@ -122,8 +101,14 @@ class Actor(arcade.Sprite):
     def move(self, x, y):
         self.position = (self.position[0] + x, self.position[1] + y)
 
-    # def draw(self, screen):
-    #     screen.blit(self.image, self.draw_position)
+    def draw(self):
+        super().draw()
+
+        # Draw the collision rectangle from our PyGame Rect, centering around x 
+        # the way that arcade renders the sprite.
+        if self.draw_collide:
+            cr = self.collide_rect
+            arcade.draw_rectangle_outline(cr[0] + cr[2]/2, cr[1], cr[2], cr[3], (255,255,255), 2)
 
     def _set_curr_frame_texture(self):
         if self.flip_horz and self.curr_frame.texture_h is not None:
