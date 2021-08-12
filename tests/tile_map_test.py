@@ -22,6 +22,19 @@ def test_can_read_map_properties():
     assert my_map.properties["player_start_y"] == '4'
     assert my_map.properties["start_script"] == "assets.scripts.level1"
 
+def test_can_tile_properties():
+    # Read in the tiled map
+    my_map = arcade.tilemap.read_tmx(os.path.join(ASSETS_DIR, "level1.tmx"))
+
+    # Check for tile properties
+    tile_sets = list(my_map.tile_sets.values())
+    tile_set = tile_sets[0]
+    tile1 = tile_set.tiles[0]
+
+    assert tile1.properties[0].name == "blocks"
+    assert tile1.properties[0].value == "none"
+
+
 def test_can_read_map_data():
     # Read in the tiled map
     my_map = arcade.tilemap.read_tmx(os.path.join(ASSETS_DIR, "level1.tmx"))
