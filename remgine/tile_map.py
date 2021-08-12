@@ -7,7 +7,9 @@ import itertools
 import importlib
 
 import arcade
-import pygame as pg
+# import pygame as pg
+from .rect import Rect
+
 import pytiled_parser
 from pytiled_parser.objects import TileLayer
 
@@ -74,7 +76,7 @@ class TileMap:
         moved = False
         actor.flip_horz = True
         new_rect = actor.collide_rect.move(-amount, 0)
-        new_rect.left += 1
+        new_rect.x += 1
 
         tys = range(
             int(new_rect.top / self.tmxdata.tile_size.height),
@@ -87,7 +89,7 @@ class TileMap:
         hit = False
         for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
-                move_pos = ((tx+1)*self.tmxdata.tile_size.width + actor.collide_rect[2]/2, actor.position[1])
+                move_pos = ((tx+1)*self.tmxdata.tile_size.width + actor.collide_rect.w/2, actor.position[1])
                 hit = True
                 moved = False
                 break
@@ -111,7 +113,7 @@ class TileMap:
         moved = False
         actor.flip_horz = False
         new_rect = actor.collide_rect.move(amount, 0)
-        new_rect.right -= 1
+        new_rect.x -= 1
 
         tys = range(
             int(new_rect.top / self.tmxdata.tile_size.height),
@@ -124,7 +126,7 @@ class TileMap:
         hit = False
         for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
-                move_pos = ((tx)*self.tmxdata.tile_size.height - actor.collide_rect[2]/2, actor.position[1])
+                move_pos = ((tx)*self.tmxdata.tile_size.height - actor.collide_rect.w/2, actor.position[1])
                 hit = True
                 moved = False
                 break
@@ -149,7 +151,7 @@ class TileMap:
         moved = False
         # self.player_y = max(self.player_radius, self.player_y - Speed)
         new_rect = actor.collide_rect.move(0, -amount)
-        new_rect.top -= 1
+        new_rect.y -= 1
         txs = range(
             int(new_rect.left / self.tmxdata.tile_size.width),
             int((new_rect.right + self.tmxdata.tile_size.width+1) / self.tmxdata.tile_size.width)
@@ -184,7 +186,7 @@ class TileMap:
         """
         moved = False
         new_rect = actor.collide_rect.move(0, amount)
-        new_rect.bottom += 1
+        new_rect.y += 1
         txs = range(
             int(new_rect.left / self.tmxdata.tile_size.width),
             int((new_rect.right + self.tmxdata.tile_size.width+1) / self.tmxdata.tile_size.width)
@@ -195,7 +197,7 @@ class TileMap:
         hit = False
         for (tx, ty) in points:
             if self.check_collide_tile(new_rect, tx, ty):
-                move_pos = (actor.position[0], (ty)*self.tmxdata.tile_size.height -actor.collide_rect[3])
+                move_pos = (actor.position[0], (ty)*self.tmxdata.tile_size.height -actor.collide_rect.h)
                 hit = True
                 moved = False
                 break
@@ -241,7 +243,7 @@ class TileMap:
         tw = self.tmxdata.tile_size.width
         th = self.tmxdata.tile_size.height
         if tile != 0:
-            collide_rect = pg.Rect(int(x*tw), int(y*th), tw, th)
+            collide_rect = Rect(int(x*tw), int(y*th), tw, th)
             # TODO: Add debug rect back in
             # Debug, draw collide rect.
             # self.debug_rects.append(collide_rect)

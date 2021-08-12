@@ -2,7 +2,8 @@ from enum import Enum
 
 import arcade
 
-import pygame # Just for Rect collisions
+# import pygame # Just for Rect collisions
+from .rect import Rect
 
 class Frame:
     def __init__(self, time, rect, gravity=(0,0), left_gravity=(0,0)):
@@ -68,10 +69,10 @@ class Actor(arcade.Sprite):
 
     @property
     def collide_rect(self):
-        r = pygame.Rect(self.position[0]+self.collide_adjust[0]-self.collide_adjust[2]/2, 
-                        self.position[1]+self.collide_adjust[1], 
-                        self.collide_adjust[2], 
-                        self.collide_adjust[3])
+        r = Rect(self.position[0]+self.collide_adjust[0]-self.collide_adjust[2]/2, 
+                 self.position[1]+self.collide_adjust[1], 
+                 self.collide_adjust[2], 
+                 self.collide_adjust[3])
         # if self.collide_scale is not None:
         #     r = pygame.Rect(r.topleft, (int(r.width*self.collide_scale), int(r.height*self.collide_scale)))
         return r
@@ -108,7 +109,7 @@ class Actor(arcade.Sprite):
         # the way that arcade renders the sprite.
         if self.draw_collide:
             cr = self.collide_rect
-            arcade.draw_rectangle_outline(cr[0] + cr[2]/2, cr[1], cr[2], cr[3], (255,255,255), 2)
+            arcade.draw_rectangle_outline(cr.x + cr.w/2, cr.y, cr.w, cr.h, (255,255,255), 2)
 
     def _set_curr_frame_texture(self):
         if self.flip_horz and self.curr_frame.texture_h is not None:
