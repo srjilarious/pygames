@@ -271,17 +271,18 @@ class PlayState(remgine.GameState):
         if kb.down(key.K):
             self.context.scroll_y -= 4
 
-        moved = False
+        moved_horz = False
+        moved_vert = False
         if kb.down(key.UP):
-            (moved, self.player.position) = self.map.check_move_up(self.player, 4)
+            (moved_vert, self.player.position) = self.map.check_move_up(self.player, 4)
         if kb.down(key.DOWN):
-            (moved, self.player.position) = self.map.check_move_down(self.player, 4)
+            (moved_vert, self.player.position) = self.map.check_move_down(self.player, 4)
         if kb.down(key.LEFT):
-            (moved, self.player.position) = self.map.check_move_left(self.player, 4)
+            (moved_horz, self.player.position) = self.map.check_move_left(self.player, 4)
         if kb.down(key.RIGHT):
-            (moved, self.player.position) = self.map.check_move_right(self.player, 4)
+            (moved_horz, self.player.position) = self.map.check_move_right(self.player, 4)
 
-        if moved:
+        if moved_horz or moved_vert:
             self.context.scroll_x = int(self.player.position[0] - self.context.screen_size[0]/2)
             self.context.scroll_y = int(self.player.position[1] - self.context.screen_size[1]/2)
 
