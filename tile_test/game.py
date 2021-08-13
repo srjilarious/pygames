@@ -273,18 +273,28 @@ class PlayState(remgine.GameState):
 
         moved_horz = False
         moved_vert = False
+        tried_move = False
         if kb.down(key.UP):
+            tried_move = True
             (moved_vert, self.player.position) = self.map.check_move_up(self.player, 4)
         if kb.down(key.DOWN):
+            tried_move = True
             (moved_vert, self.player.position) = self.map.check_move_down(self.player, 4)
         if kb.down(key.LEFT):
+            tried_move = True
             (moved_horz, self.player.position) = self.map.check_move_left(self.player, 4)
         if kb.down(key.RIGHT):
+            tried_move = True
             (moved_horz, self.player.position) = self.map.check_move_right(self.player, 4)
 
         if moved_horz or moved_vert:
             self.context.scroll_x = int(self.player.position[0] - self.context.screen_size[0]/2)
             self.context.scroll_y = int(self.player.position[1] - self.context.screen_size[1]/2)
+        
+        if tried_move:
+            self.player.curr_state_key = "walking"
+        else:
+            self.player.curr_state_key = "standing"
 
         if kb.pressed(key.ESCAPE):
             arcade.close_window()
