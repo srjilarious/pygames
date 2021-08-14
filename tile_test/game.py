@@ -28,14 +28,9 @@ SpriteSheet = "../assets/game_content5.png"
 def midpoint(a, b):
         return int(a + (b-a)/2)
 
-class PlayState(remgine.GameState):
-    def __init__(self, context):
-        super().__init__(context)
-
-        self.running = True
-        self.score = 0
-        
-        self.player = remgine.Actor({
+class Player(remgine.Actor):
+    def __init__(self):
+        super().__init__({
             "standing": remgine.Frames(SpriteSheet, 
             [ 
                 remgine.Frame(400, (557, 0, 42, 65)),
@@ -65,8 +60,100 @@ class PlayState(remgine.GameState):
             ], allows_flip_horz=True, next_state="standing", play_type=remgine.PlayType.Once)
         }, "walking")
 
-        self.player.position = (280,150)
-        self.player.collide_adjust = (0, 0, 40, 60)
+        self.position = (280,150)
+        self.collide_adjust = (0, 0, 40, 60)
+        self.jumping = False
+        self.vel_y = 0
+
+    def update(self, delta_time, context, map):
+        kb = context.keyboard
+
+        moved_horz = False
+        moved_vert = False
+        tried_move = False
+        if kb.down(key.UP):
+            tried_move = True
+            (moved_vert, self.position) = map.check_move_up(self, 4)
+        if kb.down(key.DOWN):
+            tried_move = True
+            (moved_vert, self.position) = map.check_move_down(self, 4)
+        if kb.down(key.LEFT):
+            tried_move = True
+            (moved_horz, self.position) = map.check_move_left(self, 4)
+        if kb.down(key.RIGHT):
+            tried_move = True
+            (moved_horz, self.position) = map.check_move_right(self, 4)
+
+        if moved_horz or moved_vert:
+            context.scroll_x = int(self.position[0] - context.screen_size[0]/2)
+            context.scroll_y = int(self.position[1] - context.screen_size[1]/2)
+        
+        if tried_move:
+            self.curr_state_key = "walking"
+        else:
+            self.curr_state_key = "standing"
+
+        if kb.pressed(key.ESCAPE):
+            arcade.close_window()
+
+        if kb.pressed(key.F1):
+            self.draw_collide = not self.draw_collide
+
+        # if self.keyboard.down(key.UP) and self.player.jumping == False:
+        #     moved = True
+        #     self.player.jumping = True
+        #     self.player.vel_y = -7
+
+        # # if self.keyboard.down(K_DOWN):
+        #     # moved = True
+
+        # if self.keyboard.down(key.LEFT):
+        #     moved = True
+        #     self.move_left()
+        # if self.keyboard.down(key.RIGHT):
+        #     moved = True
+        #     self.move_right()
+
+        # if self.player.vel_y < 5:
+        #     self.player.vel_y += 0.1
+
+        # if self.player.vel_y < 0:
+        #     self.move_up(int(self.player.vel_y))
+        # else:
+        #     self.move_down(int(self.player.vel_y))
+
+
+        # # Handle joystick input
+        # # if self.joystick is not None:
+        # #     jx, jy = self.joystick.get_hat(0)
+        # #     if jy > 0:
+        # #         moved = True
+        # #         self.move_up()
+        # #     if jy < 0:
+        # #         moved = True
+        # #         self.move_down()
+        # #     if jx < 0:
+        # #         moved = True
+        # #         self.move_left()
+        # #     if jx > 0:
+        # #         moved = True
+        # #         self.move_right()
+
+        # if moved:
+        #     self.player.curr_state_key = "walking"
+        # else:
+        #     self.player.curr_state_key = "standing"
+        super().update(delta_time*1000.0, context)
+
+class PlayState(remgine.GameState):
+    def __init__(self, context):
+        super().__init__(context)
+
+        self.running = True
+        self.score = 0
+        
+        self.player = Player()
+
         # self.player.center_y = 0
         # self.player = remgine.Actor({
         #     "standing": remgine.Frames(SpriteSheet, 
@@ -86,9 +173,6 @@ class PlayState(remgine.GameState):
         #         remgine.Frame(100, (505, 0, 50, 65)),
         #     ])
         # }, "standing", (100, 100))
-        
-        # self.player.jumping = False
-        # self.player.vel_y = 0
 
         # self.GoombaWalk = remgine.Frames(SpriteSheet, [
         #     remgine.Frame(150, (510, 423, 32, 30)),
@@ -271,83 +355,7 @@ class PlayState(remgine.GameState):
         if kb.down(key.K):
             self.context.scroll_y -= 4
 
-        moved_horz = False
-        moved_vert = False
-        tried_move = False
-        if kb.down(key.UP):
-            tried_move = True
-            (moved_vert, self.player.position) = self.map.check_move_up(self.player, 4)
-        if kb.down(key.DOWN):
-            tried_move = True
-            (moved_vert, self.player.position) = self.map.check_move_down(self.player, 4)
-        if kb.down(key.LEFT):
-            tried_move = True
-            (moved_horz, self.player.position) = self.map.check_move_left(self.player, 4)
-        if kb.down(key.RIGHT):
-            tried_move = True
-            (moved_horz, self.player.position) = self.map.check_move_right(self.player, 4)
-
-        if moved_horz or moved_vert:
-            self.context.scroll_x = int(self.player.position[0] - self.context.screen_size[0]/2)
-            self.context.scroll_y = int(self.player.position[1] - self.context.screen_size[1]/2)
-        
-        if tried_move:
-            self.player.curr_state_key = "walking"
-        else:
-            self.player.curr_state_key = "standing"
-
-        if kb.pressed(key.ESCAPE):
-            arcade.close_window()
-        if kb.pressed(key.F1):
-            self.player.draw_collide = not self.player.draw_collide
-
-        # if kb.any_down([key.UP, key.DOWN, key.LEFT, key.RIGHT]):
-        #     self.debug_rects.clear()
-
-        # if self.keyboard.down(key.UP) and self.player.jumping == False:
-        #     moved = True
-        #     self.player.jumping = True
-        #     self.player.vel_y = -7
-
-        # # if self.keyboard.down(K_DOWN):
-        #     # moved = True
-
-        # if self.keyboard.down(key.LEFT):
-        #     moved = True
-        #     self.move_left()
-        # if self.keyboard.down(key.RIGHT):
-        #     moved = True
-        #     self.move_right()
-
-        # if self.player.vel_y < 5:
-        #     self.player.vel_y += 0.1
-
-        # if self.player.vel_y < 0:
-        #     self.move_up(int(self.player.vel_y))
-        # else:
-        #     self.move_down(int(self.player.vel_y))
-
-
-        # # Handle joystick input
-        # # if self.joystick is not None:
-        # #     jx, jy = self.joystick.get_hat(0)
-        # #     if jy > 0:
-        # #         moved = True
-        # #         self.move_up()
-        # #     if jy < 0:
-        # #         moved = True
-        # #         self.move_down()
-        # #     if jx < 0:
-        # #         moved = True
-        # #         self.move_left()
-        # #     if jx > 0:
-        # #         moved = True
-        # #         self.move_right()
-
-        # if moved:
-        #     self.player.curr_state_key = "walking"
-        # else:
-        #     self.player.curr_state_key = "standing"
+        self.player.update(delta_time, self.context, self.map)
 
         # if self.keyboard.down(key.RETURN):
         #     self.player_x = PlayerStartX
@@ -370,7 +378,7 @@ class PlayState(remgine.GameState):
 
         # for sp in self.group:
         #     sp.update(10, self)
-        self.player.update(delta_time*1000.0, self.context)
+        
         
     def check_collide_tile(self, player_rect, x, y):
         tile = self.get_main_tile(x, y)
