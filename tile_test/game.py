@@ -65,7 +65,7 @@ class Player(remgine.Actor):
         self.jumping = False
         self.vel_y = 0
 
-    def update(self, delta_time, context, map):
+    def update(self, delta_time, context, map, camera):
         kb = context.keyboard
 
         moved_horz = False
@@ -85,8 +85,8 @@ class Player(remgine.Actor):
             (moved_horz, self.position) = map.check_move_right(self, 4)
 
         if moved_horz or moved_vert:
-            context.scroll_x = int(self.position[0] - context.screen_size[0]/2)
-            context.scroll_y = int(self.position[1] - context.screen_size[1]/2)
+            camera.goal_x = int(self.position[0] - context.screen_size[0]/2)
+            camera.goal_y = int(self.position[1] - context.screen_size[1]/2)
         
         if tried_move:
             self.curr_state_key = "walking"
@@ -153,26 +153,7 @@ class PlayState(remgine.GameState):
         self.score = 0
         
         self.player = Player()
-
-        # self.player.center_y = 0
-        # self.player = remgine.Actor({
-        #     "standing": remgine.Frames(SpriteSheet, 
-        #     [ 
-        #         remgine.Frame(400, (557, 0, 42, 65)),
-        #         remgine.Frame(400, (557, 68, 42, 65), (1, 0), (-1, 0)),
-        #     ]),
-        #     "walking": remgine.Frames(SpriteSheet, 
-        #     [ 
-        #         remgine.Frame(100, (368, 296, 50, 65)),
-        #         remgine.Frame(100, (302, 358, 50, 65)),
-        #         remgine.Frame(100, (420, 256, 50, 65)),
-        #         remgine.Frame(100, (354, 363, 50, 65)),
-        #         remgine.Frame(100, (420, 323, 50, 65)),
-        #         remgine.Frame(100, (406, 390, 50, 65)),
-        #         remgine.Frame(100, (458, 390, 50, 65)),
-        #         remgine.Frame(100, (505, 0, 50, 65)),
-        #     ])
-        # }, "standing", (100, 100))
+        self.camera = remgine.Camera(context)
 
         # self.GoombaWalk = remgine.Frames(SpriteSheet, [
         #     remgine.Frame(150, (510, 423, 32, 30)),
@@ -205,8 +186,6 @@ class PlayState(remgine.GameState):
         # ])
 
         self.map = remgine.tile_map.TileMap("../assets/level1.tmx", "main_layer")
-
-        # self.tmxdata = load_pygame("level1.tmx")
 
         # level_script = self.tmxdata.properties["start_script"]
         # if level_script is not None:
@@ -265,84 +244,6 @@ class PlayState(remgine.GameState):
                     if o.sprite.curr_state_key != "killed":
                         o.sprite.curr_state_key = "killed"
 
-    # def tile_pos(self, point):
-    #     return (int(point[0] / self.tmxdata.tilewidth), int(point[1] / self.tmxdata.tileheight))
-
-    def move_up(self, amount = -Speed):
-        pass
-        # self.player_y = max(self.player_radius, self.player_y - Speed)
-        # new_rect = self.player.collide_rect.move(0, amount)
-        # ty = int(new_rect.top / self.tmxdata.tileheight)
-        # tx_l = int(new_rect.left / self.tmxdata.tilewidth)
-        # tx_r = int(new_rect.right / self.tmxdata.tilewidth)
-        # if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
-        #     # self.player.position = (new_rect.x, new_rect.y)
-        #     self.player.position = (self.player.position[0], self.player.position[1] +amount)
-        # else:
-        #     self.player.position = (self.player.position[0], (ty+1)*self.tmxdata.tileheight)
-        #     self.player.vel_y = 0
-
-        # # Check object collisions
-        # self.check_obj_collisions(self.collectible_obj_grid.get(tx_l, ty))
-        # self.check_obj_collisions(self.collectible_obj_grid.get(midpoint(tx_l, tx_r), ty))
-        # self.check_obj_collisions(self.collectible_obj_grid.get(tx_r, ty))
-        
-        
-    def move_down(self, amount = Speed):
-        pass
-        # new_rect = self.player.collide_rect.move(0, amount)
-        # ty = int(new_rect.bottom / self.tmxdata.tileheight)
-        # tx_l = int(new_rect.left / self.tmxdata.tilewidth)
-        # tx_r = int(new_rect.right / self.tmxdata.tilewidth)
-        # if not self.check_collide_tile(new_rect, tx_l, ty) and not self.check_collide_tile(new_rect, tx_r, ty):
-        #     # self.player.position = (new_rect.x, new_rect.y)
-        #     self.player.position = (self.player.position[0], self.player.position[1] +amount)
-        # else:
-        #     self.player.position = (self.player.position[0], (ty)*self.tmxdata.tileheight -self.player.collide_rect[3])
-        #     self.player.jumping = False
-        #     self.player.vel_y = 0
-        
-        # # Check object collisions
-        # self.check_obj_collisions(self.collectible_obj_grid.get(tx_l, ty))
-        # self.check_obj_collisions(self.collectible_obj_grid.get(midpoint(tx_l, tx_r), ty))
-        # self.check_obj_collisions(self.collectible_obj_grid.get(tx_r, ty))
-
-    def move_left(self):
-        pass
-        # self.player.flip_horz = True
-        # new_rect = self.player.collide_rect.move(-Speed, 0)
-        # tx = int(new_rect.left / self.tmxdata.tilewidth)
-        # ty_t = int(new_rect.top / self.tmxdata.tileheight)
-        # ty_b = int(new_rect.bottom / self.tmxdata.tileheight)
-        # if not self.check_collide_tile(new_rect, tx, ty_t) and not self.check_collide_tile(new_rect, tx, ty_b):
-        #     # self.player.position = (new_rect.x, new_rect.y)
-        #     self.player.position = (self.player.position[0]-Speed, self.player.position[1])
-        # else:
-        #     self.player.position = ((tx+1)*self.tmxdata.tileheight, self.player.position[1])
-
-        # # Check object collisions
-        # self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_t))
-        # self.check_obj_collisions(self.collectible_obj_grid.get(tx, midpoint(ty_t, ty_b)))
-        # self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_b))
-
-    def move_right(self):
-        pass
-        # self.player.flip_horz = False
-        # new_rect = self.player.collide_rect.move(Speed, 0)
-        # tx = int(new_rect.right / self.tmxdata.tilewidth)
-        # ty_t = int(new_rect.top / self.tmxdata.tileheight)
-        # ty_b = int(new_rect.bottom / self.tmxdata.tileheight)
-        # if not self.check_collide_tile(new_rect, tx, ty_t) and not self.check_collide_tile(new_rect, tx, ty_b):
-        #     # self.player.position = (new_rect.x, new_rect.y)
-        #     self.player.position = (self.player.position[0]+Speed, self.player.position[1])
-        # else:
-        #     self.player.position = ((tx)*self.tmxdata.tileheight - 1 - self.player.collide_rect[2], self.player.position[1])
-
-        # # Check object collisions
-        # self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_t))
-        # self.check_obj_collisions(self.collectible_obj_grid.get(tx, midpoint(ty_t, ty_b)))
-        # self.check_obj_collisions(self.collectible_obj_grid.get(tx, ty_b))
-
     def update(self, delta_time):
         kb = self.context.keyboard
 
@@ -355,11 +256,9 @@ class PlayState(remgine.GameState):
         if kb.down(key.K):
             self.context.scroll_y -= 4
 
-        self.player.update(delta_time, self.context, self.map)
+        self.player.update(delta_time, self.context, self.map, self.camera)
+        self.camera.update(delta_time)
 
-        # if self.keyboard.down(key.RETURN):
-        #     self.player_x = PlayerStartX
-        #     self.player_y = PlayerStartY
         # if self.keyboard.pressed(key.SPACE):
         #     obj_list = self.interaction_obj_grid.get_from_points([
         #             self.player.rect.topleft,
@@ -373,63 +272,16 @@ class PlayState(remgine.GameState):
         #         if o.type == "hint":
         #             print("Hint: {}".format(o.properties["hint_text"]))
 
-        # if self.keyboard.down(key.ESCAPE):
-        #     self.running = False
-
-        # for sp in self.group:
-        #     sp.update(10, self)
-        
-        
-    def check_collide_tile(self, player_rect, x, y):
-        tile = self.get_main_tile(x, y)
-
-        # Grab our tile properties, if any
-        tile_props = self.tmxdata.tile_properties.get(tile, {})
-
-        # If a tile in our set is marked as non-blocking, then don't collide.
-        if tile_props.get("blocks", "all") == "none":
-            return False
-
-        tw = self.tmxdata.tilewidth
-        th = self.tmxdata.tileheight
-        if tile != 0:
-            collide_rect = pygame.Rect(int(x*tw), int(y*th), tw, th)
-            # Debug, draw collide rect.
-            self.debug_rects.append(collide_rect)
-
-            return player_rect.colliderect(collide_rect)
-        else:
-            return False
-
-    def get_main_tile(self, x, y):
-        return self.main_tiles.data[int(y)][int(x)]
 
     def render(self):
         self.map.draw()
         self.player.draw()
         
-        # Fill the background with white
-        # self.off_screen.fill((0,0,0))
-
-
-        # self.group.center((self.player.rect.x, self.player.rect.y))
-        #self.group.center((ScreenWidth/2, ScreenHeight/2))
-        
-        # self.group.draw(self.off_screen)
-        
-        # Draw a solid blue circle in the center
-        # pygame.draw.circle(self.off_screen, (0, 0, 255), (self.player_x, self.player_y), self.player_radius)
-        # p_screen_pos = pygame.Rect(ScreenWidth/2, ScreenHeight/2, PlayerWidth, PlayerHeight)
-        # pygame.draw.rect(self.off_screen, (0,0,255), p_screen_pos)
-
-        #pygame.draw.rect(self.off_screen, (0,0,255), self.player.rect)
-
         # map_offset = (self.player.rect.x-ScreenWidth/2, self.player.rect.y-ScreenHeight/2)
         # for r in self.debug_rects:
         #     pygame.draw.rect(self.off_screen, (255,255,255), r.move((-map_offset[0], -map_offset[1])), width=1)
 
         # TODO: txt = self.font.render("Score: " + str(self.score), False, pygame.Color('white'))
-
 
 
 if __name__ == "__main__":
