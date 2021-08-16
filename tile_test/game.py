@@ -71,12 +71,7 @@ class Player(remgine.Actor):
         moved_horz = False
         moved_vert = False
         tried_move = False
-        if kb.down(key.UP):
-            tried_move = True
-            (moved_vert, self.position) = map.check_move_up(self, 4)
-        if kb.down(key.DOWN):
-            tried_move = True
-            (moved_vert, self.position) = map.check_move_down(self, 4)
+            
         if kb.down(key.LEFT):
             tried_move = True
             (moved_horz, self.position) = map.check_move_left(self, 4)
@@ -84,6 +79,25 @@ class Player(remgine.Actor):
             tried_move = True
             (moved_horz, self.position) = map.check_move_right(self, 4)
 
+        if kb.down(key.UP) and not self.jumping:
+            tried_move = True
+            self.jumping = True
+            self.vel_y = 14
+
+        if self.vel_y > -7:
+            self.vel_y -= 0.3
+
+        if self.vel_y > 0:
+            (moved_vert, self.position) = map.check_move_up(self, int(self.vel_y))
+            if not moved_vert:
+                self.vel_y = 0
+        else:
+            (moved_vert, self.position) = map.check_move_down(self, int(-self.vel_y))
+            if not moved_vert:
+                self.jumping = False
+            else:
+                self.jumping = True
+            
         if moved_horz or moved_vert:
             camera.goal_x = int(self.position[0] - context.screen_size[0]/2)
             camera.goal_y = int(self.position[1] - context.screen_size[1]/2)
@@ -114,13 +128,7 @@ class Player(remgine.Actor):
         #     moved = True
         #     self.move_right()
 
-        # if self.player.vel_y < 5:
-        #     self.player.vel_y += 0.1
-
-        # if self.player.vel_y < 0:
-        #     self.move_up(int(self.player.vel_y))
-        # else:
-        #     self.move_down(int(self.player.vel_y))
+        
 
 
         # # Handle joystick input
