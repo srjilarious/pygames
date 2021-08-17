@@ -39,6 +39,20 @@ class TileMap:
             spr = arcade.process_layer(self.tmxdata, tl.name)
             self.layer_sprites.append(spr)
 
+        # Create single dicctionary of tile properties
+        tile_sets = list(self.tmxdata.tile_sets.values())
+        self.tile_props = {}
+        for tile_set in tile_sets:
+            for tile_id in tile_set.tiles:
+                if tile_id in self.tile_props:
+                    raise RuntimeError(f"tile {k} already in tile property map!")
+
+                tile = tile_set.tiles[tile_id]
+                self.tile_props[tile_id] = {}
+                for p in tile.properties:
+                    self.tile_props[tile_id][p.name] = p.value
+
+        
         # self.map_data = pyscroll.TiledMapData(self.tmxdata)
         # self.main_tiles = self.tmxdata.get_layer_by_name(collision_layer_name)
         
@@ -237,12 +251,13 @@ class TileMap:
         # tile_props = self.tmxdata.tile_properties.get(tile, {})
 
         # # If a tile in our set is marked as non-blocking, then don't collide.
-        # if tile_props.get("blocks", "all") == "none":
-        #     return False
-
-        tw = self.tmxdata.tile_size.width
-        th = self.tmxdata.tile_size.height
         if tile != 0:
+            if self.tile_props.get(tile, {}).get("blocks", "all") == "none":
+                return False
+
+            tw = self.tmxdata.tile_size.width
+            th = self.tmxdata.tile_size.height
+
             collide_rect = Rect(int(x*tw), int(y*th), tw, th)
             # TODO: Add debug rect back in
             # Debug, draw collide rect.

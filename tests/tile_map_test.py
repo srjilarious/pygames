@@ -34,6 +34,21 @@ def test_can_tile_properties():
     assert tile1.properties[0].name == "blocks"
     assert tile1.properties[0].value == "none"
 
+def test_can_create_dict_of_tile_props():
+    my_map = arcade.tilemap.read_tmx(os.path.join(ASSETS_DIR, "level1.tmx"))
+    tile_sets = list(my_map.tile_sets.values())
+    tile_props = {}
+    for tile_set in tile_sets:
+        for tile_id in tile_set.tiles:
+            if tile_id in tile_props:
+                raise RuntimeError(f"tile {k} already in tile property map!")
+
+            tile = tile_set.tiles[tile_id]
+            tile_props[tile_id] = {}
+            for p in tile.properties:
+                tile_props[tile_id][p.name] = p.value
+    
+    assert tile_props[1]["blocks"] == "none"
 
 def test_can_read_map_data():
     # Read in the tiled map
