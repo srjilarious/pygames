@@ -45,7 +45,7 @@ class TileMap:
         for tile_set in tile_sets:
             for tile_id in tile_set.tiles:
                 if tile_id in self.tile_props:
-                    raise RuntimeError(f"tile {k} already in tile property map!")
+                    raise RuntimeError(f"tile {tile_id} already in tile property map!")
 
                 tile = tile_set.tiles[tile_id]
                 self.tile_props[tile_id] = {}
@@ -252,7 +252,7 @@ class TileMap:
 
         # # If a tile in our set is marked as non-blocking, then don't collide.
         if tile != 0:
-            if self.tile_props.get(tile, {}).get("blocks", "all") == "none":
+            if self.tile_props.get(tile-1, {}).get("blocks", "all") == "none":
                 return False
 
             tw = self.tmxdata.tile_size.width
