@@ -4,12 +4,14 @@ import random
 import importlib
 import logging
 import sys
+import re
 
 import arcade
 import arcade.key as key
 
 sys.path.append("..")
 import remgine
+import remgine.console
 
 WindowWidth = 1280
 WindowHeight = 720
@@ -82,7 +84,7 @@ class Player(remgine.Actor):
         if kb.down(key.UP) and not self.jumping:
             tried_move = True
             self.jumping = True
-            self.vel_y = 14
+            self.vel_y = 12
 
         if self.vel_y > -7:
             self.vel_y -= 0.3
@@ -253,6 +255,9 @@ class PlayState(remgine.GameState):
                         o.sprite.curr_state_key = "killed"
 
     def update(self, delta_time):
+        if self.context.keyboard.pressed(key.GRAVE):
+            self.context.overlay_components["console"].toggle_active()
+
         kb = self.context.keyboard
 
         if kb.down(key.J):
@@ -291,6 +296,11 @@ class PlayState(remgine.GameState):
 
         # TODO: txt = self.font.render("Score: " + str(self.score), False, pygame.Color('white'))
 
+def teleport(x, y, context):
+    print(f"Moving player to tile {x}, {y}")
+    play_state = context.curr_game_state
+    player = play_state.player
+    player.position = (x*32, y*32)
 
 if __name__ == "__main__":
     context = remgine.GameContext(
@@ -301,5 +311,18 @@ if __name__ == "__main__":
     
     context.game_states["play_state"] = PlayState(context)
     context.curr_game_state_key = "play_state"
+
+    console = remgine.console.Console(context)
+    context.overlay_components["console"] = console
+
+    def console_callback(line, context):
+        print(f"Got line: {line}")
+        m = re.match("teleport (\d+),? (\d+)\s*", line)
+        if m:
+            print("Teleporting player!")
+            teleport(int(m.group(1)), int(m.group(2)), context)
+
+    console.callback = console_callback
+
     context.setup()
     arcade.run()

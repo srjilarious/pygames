@@ -3,10 +3,10 @@ class Camera:
     def __init__(self, context):
         self.context = context
 
-        self._max_vel_x = 8
-        self._max_vel_y = 8
+        self._max_vel_x = 10
+        self._max_vel_y = 10
 
-        self.small_dist = 150
+        self.small_dist = 170
 
         self.goal_x = 0
         self.goal_y = 0

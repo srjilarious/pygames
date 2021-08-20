@@ -20,6 +20,7 @@ class Console(GameComponent):
         self._line_render_offset = 0
         self._line = ""
         self.font_name = font_name or DEFAULT_FONT_NAME
+        self.callback = None
 
     def update(self, delta_time):
         kb = self._context.keyboard
@@ -30,6 +31,8 @@ class Console(GameComponent):
                 self._line = self._line[:-1]
             elif k == key.ENTER:
                 self.lines.append(self._line)
+                if self.callback is not None:
+                    self.callback(self._line, self._context)
                 self._line = ""
             elif k == key.UP:
                 if self._line_render_offset < len(self.lines):
