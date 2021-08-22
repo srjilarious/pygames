@@ -287,8 +287,9 @@ class PlayState(remgine.GameState):
 
 
     def render(self):
-        self.map.draw()
+        self.map.draw(0, 2)
         self.player.draw()
+        self.map.draw(2, -1)
         
         # map_offset = (self.player.rect.x-ScreenWidth/2, self.player.rect.y-ScreenHeight/2)
         # for r in self.debug_rects:

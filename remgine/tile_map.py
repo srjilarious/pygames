@@ -303,7 +303,10 @@ class TileMap:
         self.obj_grids[layer_name] = (obj_grid, context, hit_callback)
         return obj_grid
 
-    def draw(self):
-        for layer in self.layer_sprites:
+    def draw(self, start = 0, end=-1):
+        if end == -1:
+            end = len(self.layer_sprites)
+
+        for idx in range(start, end):
+            layer = self.layer_sprites[idx]
             layer.draw()
-            # self.collide_layer_sprites.draw()
