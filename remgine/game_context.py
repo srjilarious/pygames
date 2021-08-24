@@ -64,13 +64,21 @@ class GameContext(arcade.Window):
                 self.curr_game_state.render()
             
             for (k, v) in self.components.items():
-                v.render()
+                if v.activated:
+                    v.render()
 
             # Overlay components render at the window resolution
             if len(self.overlay_components) > 0:
-                arcade.set_viewport(0, self.win_size[0], 0, self.win_size[1])
+                found_active_comp = False
                 for (k, v) in self.overlay_components.items():
-                    v.render()
+                    if v.activated:
+
+                        # Only set the overlay component the first time we find an active overlay component
+                        if not found_active_comp:
+                            arcade.set_viewport(0, self.win_size[0], 0, self.win_size[1])
+                            found_active_comp = True
+                            
+                        v.render()
 
     def on_update(self, delta_time):
 
@@ -78,10 +86,12 @@ class GameContext(arcade.Window):
             self.curr_game_state.update(delta_time)
 
         for (k, v) in self.components.items():
-            v.update(delta_time)
+            if v.activated:
+                v.update(delta_time)
 
         for (k, v) in self.overlay_components.items():
-            v.update(delta_time)
+            if v.activated:
+                v.update(delta_time)
 
         self.keyboard.update()
         self.keyboard.post_update()
