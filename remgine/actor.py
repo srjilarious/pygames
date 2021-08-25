@@ -40,7 +40,7 @@ class Frames:
 
 class Actor(arcade.Sprite):
     def __init__(self, states={}, curr_state_key=None, position=(0,0)):
-        super().__init__(None)
+        super().__init__(filename=None, hit_box_algorithm="None")
 
         self.states = states
         self._curr_state_key = curr_state_key
@@ -56,7 +56,7 @@ class Actor(arcade.Sprite):
         self.layer = 0
         self.collide_adjust = (0, 0, 1, 1)
         self.draw_collide = False
-        
+
         self.reset_state()
 
     @property
@@ -119,6 +119,11 @@ class Actor(arcade.Sprite):
 
         self._set_width(self.curr_frame.width)
         self._set_height(self.curr_frame.height)
+
+        # Let the our sprite list update its internal size for this sprite.
+        if self._sprite_list is not None:
+            self._sprite_list.update_size(self)
+        
 
     def update(self, time_elapsed_ms, context):
         self.curr_frame_time += time_elapsed_ms

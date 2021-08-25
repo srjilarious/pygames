@@ -152,5 +152,5 @@ if __name__ == "__main__":
     context.game_states["play_state"] = PlayState(context)
     context.curr_game_state_key = "play_state"
     # context.components["global_keys"] = StateComponent(context)
-
+    context.setup()
     arcade.run()
