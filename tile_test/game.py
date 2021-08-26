@@ -153,7 +153,34 @@ class Player(remgine.Actor):
         #     self.player.curr_state_key = "walking"
         # else:
         #     self.player.curr_state_key = "standing"
-        super().update(delta_time*1000.0, context)
+        super().update(delta_time, context)
+
+
+class Goomba(remgine.Actor):
+    def __init__(self):
+        super().__init__(
+            {
+                "walking": remgine.Frames(SpriteSheet, [
+                    remgine.Frame(150, (510, 423, 32, 30)),
+                    remgine.Frame(150, (574, 359, 32, 30)),
+                    remgine.Frame(150, (544, 391, 32, 30))
+                ]),
+                "killed": remgine.Frames(SpriteSheet, [
+                        remgine.Frame(150, (506, 354, 32, 30)),
+                        remgine.Frame(150, (540, 327, 32, 30)),
+                        remgine.Frame(150, (540, 359, 32, 30)),
+                        remgine.Frame(150, (574, 327, 32, 30)),
+                        remgine.Frame(150, (510, 391, 32, 30)),
+                        remgine.Frame(150, (318, 425, 32, 32))
+                    ], 
+                    next_state=None, 
+                    play_type=remgine.PlayType.Once #,
+                    # on_done=on_goomba_killed
+                )
+            }, 
+            "walking"         
+        )
+
 
 class PlayState(remgine.GameState):
     def __init__(self, context):
@@ -165,28 +192,18 @@ class PlayState(remgine.GameState):
         self.player = Player()
         self.camera = remgine.Camera(context)
 
-        # self.GoombaWalk = remgine.Frames(SpriteSheet, [
-        #     remgine.Frame(150, (510, 423, 32, 30)),
-        #     remgine.Frame(150, (574, 359, 32, 30)),
-        #     remgine.Frame(150, (544, 391, 32, 30))
-        # ])
-        
+        self.enemies = arcade.SpriteList()
+        for i in range(5):
+            g = Goomba()
+            g.center_x = 32*random.randint(0, 100)
+            g.center_y = 32*random.randint(0, 30)
+            self.enemies.append(g)
+
+        self.coins = arcade.SpriteList()
+
         # def on_goomba_killed(context, actor):
         #     print("Goomba killed!!")
         #     context.group.remove(actor)
-
-        # self.GoombaDie = remgine.Frames(SpriteSheet, [
-        #         remgine.Frame(150, (506, 354, 32, 30)),
-        #         remgine.Frame(150, (540, 327, 32, 30)),
-        #         remgine.Frame(150, (540, 359, 32, 30)),
-        #         remgine.Frame(150, (574, 327, 32, 30)),
-        #         remgine.Frame(150, (510, 391, 32, 30)),
-        #         remgine.Frame(150, (318, 425, 32, 32))
-        #     ], 
-        #     next_state=None, 
-        #     play_type=remgine.PlayType.Once,
-        #     on_done=on_goomba_killed
-        #   )
 
         # self.CoinFrames = remgine.Frames(SpriteSheet, [
         #     remgine.Frame(100, (0, 448, 16, 16)),
@@ -269,7 +286,11 @@ class PlayState(remgine.GameState):
         if kb.down(key.K):
             self.context.scroll_y -= 4
 
-        self.player.update(delta_time, self.context, self.map, self.camera)
+        delta_ms = delta_time*1000.0
+        for e in self.enemies:
+            e.update(delta_ms, self.context)
+
+        self.player.update(delta_ms, self.context, self.map, self.camera)
         self.camera.update(delta_time)
 
         # if self.keyboard.pressed(key.SPACE):
@@ -288,6 +309,8 @@ class PlayState(remgine.GameState):
 
     def render(self):
         self.map.draw(0, 2)
+        for e in self.enemies:
+            e.draw()
         self.player.draw()
         self.map.draw(2, -1)
         
